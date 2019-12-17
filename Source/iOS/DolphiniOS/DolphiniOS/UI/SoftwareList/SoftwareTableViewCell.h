@@ -8,7 +8,9 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface SoftwareTableViewCell : UITableViewCell
 
-@property(weak, nonatomic) IBOutlet UILabel* fileNameLabel;
+@property(weak, nonatomic) IBOutlet UILabel* gameName;
+@property(weak, nonatomic) IBOutlet UILabel* gameSystem;
+@property(weak, nonatomic) IBOutlet UIImageView* gameCover;
 
 @end
 

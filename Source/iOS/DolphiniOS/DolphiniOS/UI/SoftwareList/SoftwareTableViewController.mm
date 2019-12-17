@@ -12,8 +12,12 @@
 #import "UICommon/GameFile.h"
 
 #import <MetalKit/MetalKit.h>
+#import <SafariServices/SafariServices.h>
 
-@interface SoftwareTableViewController ()
+@interface SoftwareTableViewController () <UISearchResultsUpdating>
+
+@property UISearchController *searchController;
+@property UITableViewController *resultsController;
 
 @end
 
@@ -22,11 +26,12 @@
 - (void)viewDidLoad
 {
   [super viewDidLoad];
-  
   // Load the GameFileCache
   self.m_cache = new UICommon::GameFileCache();
   self.m_cache->Load();
-  
+  self.navigationItem.searchController = [[UISearchController alloc] initWithSearchResultsController:[UITableViewController alloc]];
+  self.searchController.searchResultsUpdater = self;
+  self.navigationItem.searchController.searchBar.scopeButtonTitles = @[@"All", @"GameCube", @"Wii"];
   [self rescanGameFilesWithRefreshing:false];
   
   // Create a UIRefreshControl
@@ -180,6 +185,8 @@
   [user_defaults setInteger:launch_times + 1 forKey:@"launch_times"];
 }
 
+#pragma mark - Add Button
+
 - (IBAction)addButtonPressed:(id)sender
 {
   NSArray* types = @[
@@ -214,43 +221,60 @@
 
 - (UITableViewCell*)tableView:(UITableView*)tableView cellForRowAtIndexPath:(NSIndexPath*)indexPath
 {
-  SoftwareTableViewCell* cell =
-      (SoftwareTableViewCell*)[tableView dequeueReusableCellWithIdentifier:@"softwareCell"
-                                                              forIndexPath:indexPath];
-  
-  NSString* cell_contents = @"";
-  
-  // Get the GameFile
-  std::shared_ptr<const UICommon::GameFile> file = self.m_cache->Get(indexPath.item);
-  DiscIO::Platform platform = file->GetPlatform();
-  
-  // Add the platform prefix
-  if (platform == DiscIO::Platform::GameCubeDisc)
-  {
-    cell_contents = [cell_contents stringByAppendingString:@"[GC] "];
-  }
-  else if (platform == DiscIO::Platform::WiiDisc || platform == DiscIO::Platform::WiiWAD)
-  {
-    cell_contents = [cell_contents stringByAppendingString:@"[Wii] "];
-  }
-  else
-  {
-    cell_contents = [cell_contents stringByAppendingString:@"[Unk] "];
-  }
-  
-  // Append the game name
-  NSString* game_name = [NSString stringWithUTF8String:file->GetLongName().c_str()];
-  cell_contents = [cell_contents stringByAppendingString:game_name];
-  
-  // Set the cell label text
-  cell.fileNameLabel.text = cell_contents;
+    SoftwareTableViewCell* cell = (SoftwareTableViewCell*)[tableView dequeueReusableCellWithIdentifier:@"softwareCell"
+                                                                  forIndexPath:indexPath];
+      
+    NSString* game_system = @"";
+      
+    // Get the GameFile
+    std::shared_ptr<const UICommon::GameFile> file = self.m_cache->Get(indexPath.item);
+    DiscIO::Platform platform = file->GetPlatform();
+    // Add the platform prefix
+    if (platform == DiscIO::Platform::GameCubeDisc)
+    {
+        game_system = @"GameCube";
+    }
+    else if (platform == DiscIO::Platform::WiiDisc || platform == DiscIO::Platform::WiiWAD)
+    {
+        game_system = @"Wii";
+    }
+    else
+    {
+        game_system = @"Unknown";
+    }
+        
+    // Append the game name
+    NSString* game_name = [NSString stringWithUTF8String:file->GetLongName().c_str()];
+    NSString* game_file_name = [NSString stringWithUTF8String:file->GetFileName().c_str()];
+    NSString* game_id = [NSString stringWithUTF8String:file->GetGameTDBID().c_str()];
+    NSString* game_region = [self getGameRegionCode:file];
+      
+    NSURL *game_cover = [NSURL URLWithString:[NSString stringWithFormat:@"https://art.gametdb.com/wii/cover/%@/%@.png", game_region, game_id]];
+    NSLog(@"'%@'", game_file_name);
+    // Set the cell label text
+    cell.gameName.text = ([game_name length] > 0) ? game_name : game_file_name;
+    cell.gameSystem.text = game_system;
+    
+    // Set the cell image
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
+        NSData *imageData = [NSData dataWithContentsOfURL:game_cover];
 
-  return cell;
+        dispatch_async(dispatch_get_main_queue(), ^{
+            // Update the UI
+            cell.gameCover.image = [UIImage imageWithData:imageData];
+            [cell layoutSubviews];
+        });
+    });
+    return cell;
 }
 
 - (void)tableView:(UITableView*)tableView didSelectRowAtIndexPath:(NSIndexPath*)indexPath
 {
   [self performSegueWithIdentifier:@"toEmulation" sender:nil];
+}
+
+- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
+    return 68;
 }
 
 #pragma mark - Document picker delegate methods
@@ -282,15 +306,13 @@
 
 - (IBAction)unwindToSoftwareTable:(UIStoryboardSegue*)segue {}
 
-/*
 // Override to support conditional editing of the table view.
 - (BOOL)tableView:(UITableView *)tableView canEditRowAtIndexPath:(NSIndexPath *)indexPath {
     // Return NO if you do not want the specified item to be editable.
     return YES;
 }
-*/
 
-/*
+
 // Override to support editing the table view.
 - (void)tableView:(UITableView *)tableView
 commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath
@@ -299,11 +321,109 @@ commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(
         [tableView deleteRowsAtIndexPaths:@[indexPath]
 withRowAnimation:UITableViewRowAnimationFade]; } else if (editingStyle ==
 UITableViewCellEditingStyleInsert) {
-        // Create a new instance of the appropriate class, insert it into the array, and add a new
-row to the table view
+        // Create a new instance of the appropriate class, insert it into the array, and add a new row to the table view
     }
 }
-*/
+
+#pragma mark - Handle Search
+
+- (void)updateSearchResultsForSearchController:(nonnull UISearchController *)searchController {
+    NSString* query = searchController.searchBar.text;
+    NSLog(@"%@, %ld", query, (long)searchController.searchBar.selectedScopeButtonIndex);
+}
+
+# pragma mark - Convert Region to String
+- (NSString *)getGameRegionCode:(std::shared_ptr<const UICommon::GameFile>)game {
+    switch (game->GetRegion()) {
+        case DiscIO::Region::NTSC_J:
+            return @"JA";
+            break;
+        case DiscIO::Region::NTSC_U:
+            return @"US";
+            break;
+        case DiscIO::Region::NTSC_K:
+            return @"KO";
+            break;
+        default:
+            return @"UN";
+            break;
+        case DiscIO::Region::PAL:
+            const auto user_lang = DiscIO::Language::English;
+            switch (user_lang) {
+                case DiscIO::Language::German:
+                    return @"DE";
+                    break;
+                case DiscIO::Language::French:
+                    return @"FR";
+                    break;
+                case DiscIO::Language::Spanish:
+                    return @"ES";
+                    break;
+                case DiscIO::Language::Italian:
+                    return @"IT";
+                    break;
+                case DiscIO::Language::Dutch:
+                    return @"NL";
+                    break;
+                case DiscIO::Language::English:
+                default:
+                    return @"EN";
+                    break;
+            }
+            break;
+    }
+}
+
+#pragma mark - Context Menu
+
+- (UIContextMenuConfiguration *)tableView:(UITableView *)tableView contextMenuConfigurationForRowAtIndexPath:(NSIndexPath *)indexPath point:(CGPoint)point  API_AVAILABLE(ios(13.0)){
+    return [UIContextMenuConfiguration configurationWithIdentifier:NULL previewProvider:NULL actionProvider:^(NSArray* suggestedAction){
+        
+        UITableViewCell *cell = [tableView cellForRowAtIndexPath:indexPath];
+        std::shared_ptr<const UICommon::GameFile> file = self.m_cache->Get(indexPath.item);
+
+        // Open Preview
+        UIAction* wikiAction = [UIAction actionWithTitle:@"Wiki" image:[UIImage systemImageNamed:@"eyeglasses"] identifier:nil handler:^(UIAction *action){
+            NSString * game_id = [NSString stringWithUTF8String:file->GetGameID().c_str()];
+            NSURL *wiki_url = [NSURL URLWithString:[NSString stringWithFormat:@"https://wiki.dolphin-emu.org/index.php?title=%@", game_id]];
+            SFSafariViewController *sf_controller = [[SFSafariViewController alloc] initWithURL:wiki_url];
+            [self presentViewController:sf_controller animated:YES completion:nil];
+            NSLog(@"%@", wiki_url);
+        }];
+        
+        
+        // Rename Action
+        UIAction* infoAction = [UIAction actionWithTitle:@"Info" image:[UIImage systemImageNamed:@"info.circle"] identifier:nil handler:^(UIAction *action){
+
+        }];
+        
+        // Copy Action
+        UIAction* configAction = [UIAction actionWithTitle:@"Config" image:[UIImage systemImageNamed:@"dial"] identifier:nil handler:^(UIAction *action){
+//            UIPasteboard *pb = [UIPasteboard generalPasteboard];
+//            [pb setString:[NSString stringWithFormat:@"%@/%@", self.currentFolder.path, cell.textLabel.text]];
+        }];
+        
+        // Move Action
+        UIAction* cheatsAction = [UIAction actionWithTitle:@"Cheats" image:[UIImage systemImageNamed:@"cube"] identifier:nil handler:^(UIAction *action){
+            
+        }];
+        
+        // Share Action
+        UIAction* shareAction = [UIAction actionWithTitle:@"Share" image:[UIImage systemImageNamed:@"square.and.arrow.up"] identifier:nil handler:^(UIAction *action){
+            NSLog(@"BRUH");
+        }];
+        
+        // Delete Action
+        UIAction* deleteAction = [UIAction actionWithTitle:@"Delete" image:[UIImage systemImageNamed:@"trash"] identifier:nil  handler:^(UIAction *action){
+            UITableViewCell *cell = [tableView cellForRowAtIndexPath:indexPath];
+//            [self.currentFolder removeItemNamed:cell.textLabel.text];
+//            [tableView deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationLeft];
+        }];
+        deleteAction.attributes = UIMenuElementAttributesDestructive;
+        
+        return [UIMenu menuWithTitle:@"" children:@[wikiAction, infoAction, configAction, cheatsAction, shareAction, deleteAction]];
+    }];
+}
 
 /*
 // Override to support rearranging the table view.
@@ -317,17 +437,6 @@ row to the table view
 - (BOOL)tableView:(UITableView *)tableView canMoveRowAtIndexPath:(NSIndexPath *)indexPath {
     // Return NO if you do not want the item to be re-orderable.
     return YES;
-}
-*/
-
-/*
-#pragma mark - Navigation
-
-// In a storyboard-based application, you will often want to do a little preparation before
-navigation
-- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
-    // Get the new view controller using [segue destinationViewController].
-    // Pass the selected object to the new view controller.
 }
 */
 

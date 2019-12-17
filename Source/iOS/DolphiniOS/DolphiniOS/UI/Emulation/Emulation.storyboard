@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="15505" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="15701" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="15510"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="15703"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
@@ -55,11 +55,14 @@
                         <viewLayoutGuide key="safeArea" id="Dzs-Je-a4O"/>
                     </view>
                     <navigationItem key="navigationItem" title="Dolphin" id="FkZ-jT-nNo">
-                        <barButtonItem key="rightBarButtonItem" systemItem="stop" id="KWi-lr-CcJ">
-                            <connections>
-                                <action selector="exitButtonPressed:" destination="72Z-je-Eys" id="8Q6-He-Bij"/>
-                            </connections>
-                        </barButtonItem>
+                        <rightBarButtonItems>
+                            <barButtonItem systemItem="stop" id="KWi-lr-CcJ">
+                                <connections>
+                                    <action selector="exitButtonPressed:" destination="72Z-je-Eys" id="8Q6-He-Bij"/>
+                                </connections>
+                            </barButtonItem>
+                            <barButtonItem title="Item" image="ellipsis.circle" catalog="system" id="XqU-yH-sdt"/>
+                        </rightBarButtonItems>
                     </navigationItem>
                     <connections>
                         <outlet property="m_eagl_view" destination="daX-vt-kk3" id="p1U-me-Qo3"/>
@@ -93,4 +96,7 @@
             <point key="canvasLocation" x="128.98550724637681" y="56.919642857142854"/>
         </scene>
     </scenes>
+    <resources>
+        <image name="ellipsis.circle" catalog="system" width="64" height="60"/>
+    </resources>
 </document>

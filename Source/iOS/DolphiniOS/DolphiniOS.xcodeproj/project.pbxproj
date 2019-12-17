@@ -76,6 +76,9 @@
 		B99B05BD23A2E8BD0076C7D8 /* SpecialThanks.txt in Resources */ = {isa = PBXBuildFile; fileRef = B99B05BC23A2E8BD0076C7D8 /* SpecialThanks.txt */; };
 		B99B05BF23A323600076C7D8 /* MetalKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B99B05BE23A323600076C7D8 /* MetalKit.framework */; };
 		B9EB847E2389C1A8006256C0 /* EmulationViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9EB847D2389C1A7006256C0 /* EmulationViewController.swift */; };
+		E1BA8D9F23A820F300C6AB7A /* SafariServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E1BA8D9E23A820F300C6AB7A /* SafariServices.framework */; };
+		E1BA8DA123A8269100C6AB7A /* DolphinINIParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1BA8DA023A8269100C6AB7A /* DolphinINIParser.swift */; };
+		E1BA8DA623A86BDC00C6AB7A /* IniSettingsTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = E1BA8DA523A86BDC00C6AB7A /* IniSettingsTableViewController.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -178,6 +181,10 @@
 		B99B05BC23A2E8BD0076C7D8 /* SpecialThanks.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = SpecialThanks.txt; sourceTree = "<group>"; };
 		B99B05BE23A323600076C7D8 /* MetalKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MetalKit.framework; path = System/Library/Frameworks/MetalKit.framework; sourceTree = SDKROOT; };
 		B9EB847D2389C1A7006256C0 /* EmulationViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmulationViewController.swift; sourceTree = "<group>"; };
+		E1BA8D9E23A820F300C6AB7A /* SafariServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SafariServices.framework; path = System/Library/Frameworks/SafariServices.framework; sourceTree = SDKROOT; };
+		E1BA8DA023A8269100C6AB7A /* DolphinINIParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DolphinINIParser.swift; sourceTree = "<group>"; };
+		E1BA8DA423A86BDC00C6AB7A /* IniSettingsTableViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = IniSettingsTableViewController.h; sourceTree = "<group>"; };
+		E1BA8DA523A86BDC00C6AB7A /* IniSettingsTableViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = IniSettingsTableViewController.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -213,6 +220,7 @@
 				B945A3ED2362DBB200B21680 /* libimgui.a in Frameworks */,
 				B945A3EE2362DBB200B21680 /* libglslang.a in Frameworks */,
 				B945A3EF2362DBB200B21680 /* libcpp-optparse.a in Frameworks */,
+				E1BA8D9F23A820F300C6AB7A /* SafariServices.framework in Frameworks */,
 				B945A3D02362DB9800B21680 /* libdiscio.a in Frameworks */,
 				B945A3D12362DB9800B21680 /* libuicommon.a in Frameworks */,
 				B945A3D22362DB9800B21680 /* libvideocommon.a in Frameworks */,
@@ -236,6 +244,9 @@
 			children = (
 				B91BF372236B400200199BA7 /* SettingsTableViewController.h */,
 				B91BF373236B400200199BA7 /* SettingsTableViewController.m */,
+				E1BA8DA423A86BDC00C6AB7A /* IniSettingsTableViewController.h */,
+				E1BA8DA523A86BDC00C6AB7A /* IniSettingsTableViewController.m */,
+				E1BA8DA023A8269100C6AB7A /* DolphinINIParser.swift */,
 			);
 			path = Settings;
 			sourceTree = "<group>";
@@ -314,6 +325,7 @@
 		B945A3932362D98300B21680 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				E1BA8D9E23A820F300C6AB7A /* SafariServices.framework */,
 				B99B05BE23A323600076C7D8 /* MetalKit.framework */,
 				B95A09472385DE9600DBBB01 /* AudioToolbox.framework */,
 				B95A09482385DE9600DBBB01 /* AudioUnit.framework */,
@@ -571,6 +583,7 @@
 				B962BCD8238C3965009F86F5 /* TCDirectionalPad.swift in Sources */,
 				B945A3862362909500B21680 /* main.m in Sources */,
 				B91BF371236B3FE500199BA7 /* SoftwareTableViewController.mm in Sources */,
+				E1BA8DA123A8269100C6AB7A /* DolphinINIParser.swift in Sources */,
 				B95A09342382782600DBBB01 /* TCGameCubePad.swift in Sources */,
 				B945A3922362D90200B21680 /* EAGLView.m in Sources */,
 				B945A3782362908500B21680 /* SceneDelegate.m in Sources */,
@@ -579,6 +592,7 @@
 				B95A092D2382715E00DBBB01 /* TCButton.swift in Sources */,
 				B99B05BB23A2118B0076C7D8 /* TCWiiPad.swift in Sources */,
 				B95A09382382D89600DBBB01 /* TCJoystick.swift in Sources */,
+				E1BA8DA623A86BDC00C6AB7A /* IniSettingsTableViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -740,7 +754,7 @@
 				CLANG_CXX_LIBRARY = "compiler-default";
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = 46669ZA7J4;
+				DEVELOPMENT_TEAM = F7F5H2QUCJ;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"DEBUG=1",
 					"SUPPRESS_UNSUPPORTED_DEVICE=1",
@@ -751,9 +765,9 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0.0;
+				MARKETING_VERSION = 1.0.7;
 				PRODUCT_BUNDLE_IDENTIFIER = "org.dolphin-emu.DolphiniOS";
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_NAME = DolphiniOS;
 				SWIFT_OBJC_BRIDGING_HEADER = "DolphiniOS/DolphiniOS-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
@@ -774,16 +788,16 @@
 				CLANG_CXX_LIBRARY = "compiler-default";
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = 46669ZA7J4;
+				DEVELOPMENT_TEAM = F7F5H2QUCJ;
 				HEADER_SEARCH_PATHS = "";
 				INFOPLIST_FILE = DolphiniOS/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0.0;
+				MARKETING_VERSION = 1.0.7;
 				PRODUCT_BUNDLE_IDENTIFIER = "org.dolphin-emu.DolphiniOS";
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_NAME = DolphiniOS;
 				SWIFT_OBJC_BRIDGING_HEADER = "DolphiniOS/DolphiniOS-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";

@@ -5,6 +5,7 @@
 import Foundation
 import MetalKit
 import UIKit
+import GameController
 
 class EmulationViewController: UIViewController, UIGestureRecognizerDelegate
 {
@@ -94,6 +95,8 @@ class EmulationViewController: UIViewController, UIGestureRecognizerDelegate
         self.performSegue(withIdentifier: "toSoftwareTable", sender: nil)
       }
     }
+    ObserveForGameControllers()
+    connectControllers()
   }
   
   override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator)
@@ -165,6 +168,143 @@ class EmulationViewController: UIViewController, UIGestureRecognizerDelegate
     }))
     
     self.present(alert, animated: true, completion: nil)
+  }
+    
+  // Function to run intially to lookout for any MFI or Remote Controllers in the area
+  func ObserveForGameControllers() {
+    NotificationCenter.default.addObserver(self, selector: #selector(connectControllers), name: NSNotification.Name.GCControllerDidConnect, object: nil)
+    NotificationCenter.default.addObserver(self, selector: #selector(disconnectControllers), name: NSNotification.Name.GCControllerDidDisconnect, object: nil)
+  }
+    
+    // This Function is called when a controller is connected to the Apple TV
+  @objc func connectControllers() {
+    //Used to register the Nimbus Controllers to a specific Player Number
+    var indexNumber = 0
+    // Run through each controller currently connected to the system
+    for controller in GCController.controllers() {
+    //Check to see whether it is an extended Game Controller (Such as a Nimbus)
+      if controller.extendedGamepad != nil {
+        if (self.isWii) {
+        m_wii_pad_view.isHidden = true
+        controller.playerIndex = GCControllerPlayerIndex.init(rawValue: indexNumber)!
+        indexNumber += 1
+        setupControllerControls(controller: controller)
+        }
+        else {
+            m_gc_pad_view.isHidden = true
+            controller.playerIndex = GCControllerPlayerIndex.init(rawValue: indexNumber)!
+            indexNumber += 1
+            setupControllerControls(controller: controller)
+        }
+      }
+    }
+  }
+
+  @objc func disconnectControllers() {
+    if (self.isWii) {
+    m_wii_pad_view.isHidden = false
+        }
+        else {
+            m_gc_pad_view.isHidden = false
+        }
+  }
+
+  func setupControllerControls(controller: GCController) {
+    //Function that check the controller when anything is moved or pressed on it
+    controller.extendedGamepad?.valueChangedHandler = {
+      (gamepad: GCExtendedGamepad, element: GCControllerElement) in
+      // Add movement in here for sprites of the controllers
+      self.controllerInputDetected(gamepad: gamepad, element: element, index: controller.playerIndex.rawValue)
+    }
+  }
+ 
+  func controllerInputDetected(gamepad: GCExtendedGamepad, element: GCControllerElement, index: Int) {
+    if #available(iOS 13.0, *) {
+    if (self.isWii) {
+      switch element {
+        case gamepad.buttonA:
+            MainiOS.gamepadEvent(forButton: Int32(TCButtonType.WIIMOTE_BUTTON_A.rawValue), action: Int32(gamepad.buttonA.isPressed ? 1 : 0))
+            case gamepad.buttonB:
+                MainiOS.gamepadEvent(forButton: Int32(TCButtonType.WIIMOTE_BUTTON_1.rawValue), action: Int32(gamepad.buttonB.isPressed ? 1 : 0))
+            case gamepad.buttonX:
+                MainiOS.gamepadEvent(forButton: Int32(TCButtonType.WIIMOTE_BUTTON_B.rawValue), action: Int32(gamepad.buttonX.isPressed ? 1 : 0))
+            case gamepad.buttonY:
+                MainiOS.gamepadEvent(forButton: Int32(TCButtonType.WIIMOTE_BUTTON_2.rawValue), action: Int32(gamepad.buttonY.isPressed ? 1 : 0))
+            case gamepad.rightShoulder:
+                MainiOS.gamepadEvent(forButton: Int32(TCButtonType.NUNCHUK_BUTTON_Z.rawValue), action: Int32(gamepad.rightShoulder.value == 0 ? 0 : 1))
+            case gamepad.leftShoulder:
+                MainiOS.gamepadEvent(forButton: Int32(TCButtonType.NUNCHUK_BUTTON_C.rawValue), action: Int32(gamepad.leftShoulder.value == 0 ? 0 : 1))
+            case gamepad.buttonMenu:
+                MainiOS.gamepadEvent(forButton: Int32(TCButtonType.WIIMOTE_BUTTON_PLUS.rawValue), action: Int32(gamepad.buttonMenu.value == 0 ? 0 : 1))
+            case gamepad.leftThumbstick:
+                MainiOS.gamepadMoveEvent(forAxis: Int32(TCButtonType.NUNCHUK_STICK.rawValue+1), value: CGFloat(-gamepad.leftThumbstick.up.value))
+                MainiOS.gamepadMoveEvent(forAxis: Int32(TCButtonType.NUNCHUK_STICK.rawValue+2), value: CGFloat(gamepad.leftThumbstick.down.value))
+                MainiOS.gamepadMoveEvent(forAxis: Int32(TCButtonType.NUNCHUK_STICK.rawValue+3), value: CGFloat(-gamepad.leftThumbstick.left.value))
+                MainiOS.gamepadMoveEvent(forAxis: Int32(TCButtonType.NUNCHUK_STICK.rawValue+4), value: CGFloat(gamepad.leftThumbstick.right.value))
+            case gamepad.rightThumbstick:
+                MainiOS.gamepadMoveEvent(forAxis: Int32(TCButtonType.WIIMOTE_IR.rawValue+1), value: CGFloat(-gamepad.rightThumbstick.up.value))
+                MainiOS.gamepadMoveEvent(forAxis: Int32(TCButtonType.WIIMOTE_IR.rawValue+2), value: CGFloat(gamepad.rightThumbstick.down.value))
+                MainiOS.gamepadMoveEvent(forAxis: Int32(TCButtonType.WIIMOTE_IR.rawValue+3), value: CGFloat(-gamepad.rightThumbstick.left.value))
+                MainiOS.gamepadMoveEvent(forAxis: Int32(TCButtonType.WIIMOTE_IR.rawValue+4), value: CGFloat(gamepad.rightThumbstick.right.value))
+            case gamepad.dpad:
+                MainiOS.gamepadEvent(forButton: Int32(TCButtonType.WIIMOTE_UP.rawValue), action: gamepad.dpad.up.isPressed ? 1 : 0)
+                MainiOS.gamepadEvent(forButton: Int32(TCButtonType.WIIMOTE_DOWN.rawValue), action: gamepad.dpad.down.isPressed ? 1 : 0)
+                MainiOS.gamepadEvent(forButton: Int32(TCButtonType.WIIMOTE_LEFT.rawValue), action: gamepad.dpad.left.isPressed ? 1 : 0)
+                MainiOS.gamepadEvent(forButton: Int32(TCButtonType.WIIMOTE_RIGHT.rawValue), action: gamepad.dpad.right.isPressed ? 1 : 0)
+            case gamepad.leftTrigger:
+                MainiOS.gamepadMoveEvent(forAxis: Int32(TCButtonType.WIIMOTE_BUTTON_MINUS.rawValue), value: CGFloat(gamepad.leftTrigger.value))
+            case gamepad.rightTrigger:
+                MainiOS.gamepadMoveEvent(forAxis: Int32(TCButtonType.WIIMOTE_SHAKE_X.rawValue), value: CGFloat(gamepad.rightTrigger.value))
+                MainiOS.gamepadMoveEvent(forAxis: Int32(TCButtonType.WIIMOTE_SHAKE_Y.rawValue), value: CGFloat(gamepad.rightTrigger.value))
+                MainiOS.gamepadMoveEvent(forAxis: Int32(TCButtonType.WIIMOTE_SHAKE_Z.rawValue), value: CGFloat(gamepad.rightTrigger.value))
+                MainiOS.gamepadMoveEvent(forAxis: Int32(TCButtonType.NUNCHUK_SHAKE_X.rawValue), value: CGFloat(gamepad.rightTrigger.value))
+                MainiOS.gamepadMoveEvent(forAxis: Int32(TCButtonType.NUNCHUK_SHAKE_Y.rawValue), value: CGFloat(gamepad.rightTrigger.value))
+                MainiOS.gamepadMoveEvent(forAxis: Int32(TCButtonType.NUNCHUK_SHAKE_Z.rawValue), value: CGFloat(gamepad.rightTrigger.value))
+        default:
+            NSLog("oeuf")
+        }
+        }
+    else {
+        switch element {
+        case gamepad.buttonA:
+            MainiOS.gamepadEvent(forButton: Int32(TCButtonType.BUTTON_A.rawValue), action: Int32(gamepad.buttonA.isPressed ? 1 : 0))
+        case gamepad.buttonB:
+            MainiOS.gamepadEvent(forButton: Int32(TCButtonType.BUTTON_X.rawValue), action: Int32(gamepad.buttonB.isPressed ? 1 : 0))
+        case gamepad.buttonX:
+            MainiOS.gamepadEvent(forButton: Int32(TCButtonType.BUTTON_B.rawValue), action: Int32(gamepad.buttonX.isPressed ? 1 : 0))
+        case gamepad.buttonY:
+            MainiOS.gamepadEvent(forButton: Int32(TCButtonType.BUTTON_Y.rawValue), action: Int32(gamepad.buttonY.isPressed ? 1 : 0))
+        case gamepad.rightShoulder:
+            MainiOS.gamepadEvent(forButton: Int32(TCButtonType.BUTTON_Z.rawValue), action: Int32(gamepad.rightShoulder.value == 0 ? 0 : 1))
+        case gamepad.buttonMenu:
+            MainiOS.gamepadEvent(forButton: Int32(TCButtonType.BUTTON_START.rawValue), action: Int32(gamepad.buttonMenu.value == 0 ? 0 : 1))
+        case gamepad.leftThumbstick:
+            MainiOS.gamepadMoveEvent(forAxis: Int32(TCButtonType.STICK_MAIN.rawValue+1), value: CGFloat(-gamepad.leftThumbstick.up.value))
+            MainiOS.gamepadMoveEvent(forAxis: Int32(TCButtonType.STICK_MAIN.rawValue+2), value: CGFloat(gamepad.leftThumbstick.down.value))
+            MainiOS.gamepadMoveEvent(forAxis: Int32(TCButtonType.STICK_MAIN.rawValue+3), value: CGFloat(-gamepad.leftThumbstick.left.value))
+            MainiOS.gamepadMoveEvent(forAxis: Int32(TCButtonType.STICK_MAIN.rawValue+4), value: CGFloat(gamepad.leftThumbstick.right.value))
+        case gamepad.rightThumbstick:
+            MainiOS.gamepadMoveEvent(forAxis: Int32(TCButtonType.STICK_C.rawValue+1), value: CGFloat(-gamepad.rightThumbstick.up.value))
+            MainiOS.gamepadMoveEvent(forAxis: Int32(TCButtonType.STICK_C.rawValue+2), value: CGFloat(gamepad.rightThumbstick.down.value))
+            MainiOS.gamepadMoveEvent(forAxis: Int32(TCButtonType.STICK_C.rawValue+3), value: CGFloat(-gamepad.rightThumbstick.left.value))
+            MainiOS.gamepadMoveEvent(forAxis: Int32(TCButtonType.STICK_C.rawValue+4), value: CGFloat(gamepad.rightThumbstick.right.value))
+        case gamepad.dpad:
+            MainiOS.gamepadEvent(forButton: Int32(TCButtonType.BUTTON_UP.rawValue), action: gamepad.dpad.up.isPressed ? 1 : 0)
+            MainiOS.gamepadEvent(forButton: Int32(TCButtonType.BUTTON_DOWN.rawValue), action: gamepad.dpad.down.isPressed ? 1 : 0)
+            MainiOS.gamepadEvent(forButton: Int32(TCButtonType.BUTTON_LEFT.rawValue), action: gamepad.dpad.left.isPressed ? 1 : 0)
+            MainiOS.gamepadEvent(forButton: Int32(TCButtonType.BUTTON_RIGHT.rawValue), action: gamepad.dpad.right.isPressed ? 1 : 0)
+        case gamepad.leftTrigger:
+            MainiOS.gamepadMoveEvent(forAxis: Int32(TCButtonType.TRIGGER_L.rawValue), value: CGFloat(gamepad.leftTrigger.value))
+        case gamepad.rightTrigger:
+            MainiOS.gamepadMoveEvent(forAxis: Int32(TCButtonType.TRIGGER_R.rawValue), value: CGFloat(gamepad.rightTrigger.value))
+        default:
+            NSLog("oeuf")
+        }
+        }
+    } else {
+        // Fallback on earlier versions
+    }
+    //MainiOS.gamepadEvent(forButton: Int32(controllerButton), action: 1)
   }
   
 }

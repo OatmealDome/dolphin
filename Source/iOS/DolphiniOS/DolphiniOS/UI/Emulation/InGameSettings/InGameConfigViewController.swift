@@ -7,12 +7,18 @@ import UIKit
 class InGameConfigViewController: UITableViewController
 {
   var m_emulation_controller: EmulationViewController? = nil
-  
+    
+  @IBOutlet weak var haptic_feedback_switch: UISwitch!
+    
   override func viewDidLoad()
   {
     super.viewDidLoad()
     
+    getSwitchState()
+    
     self.m_emulation_controller = self.parent?.presentingViewController?.children[0] as? EmulationViewController
+    
+    haptic_feedback_switch.addTarget(self, action: #selector(hapticFeedbackSwitchToggled(hapticSwitch:)), for: .valueChanged)
   }
   
   override func tableView(_ tableView: UITableView, willSelectRowAt indexPath: IndexPath) -> IndexPath?
@@ -52,5 +58,24 @@ class InGameConfigViewController: UITableViewController
       destination.m_emulation_controller = self.m_emulation_controller
     }
   }
-
+    
+  func getSwitchState()
+  {
+    // If user is on an iPad, disable use of the switch
+    if UIDevice.current.userInterfaceIdiom == .pad
+    {
+        haptic_feedback_switch.setOn(false, animated: false)
+        haptic_feedback_switch.isEnabled = false
+    }
+    else
+    {
+        // Created in case more switches are added to this view so viewdidload isn't cluttered
+        haptic_feedback_switch.setOn(UserDefaults.standard.bool(forKey: "haptic_feedback_enabled"), animated: false)
+    }
+  }
+    
+  @objc func hapticFeedbackSwitchToggled(hapticSwitch: UISwitch)
+  {
+    UserDefaults.standard.set(hapticSwitch.isOn, forKey: "haptic_feedback_enabled")
+  }
 }

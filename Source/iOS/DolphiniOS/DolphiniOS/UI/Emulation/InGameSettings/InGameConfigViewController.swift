@@ -9,16 +9,24 @@ class InGameConfigViewController: UITableViewController
   var m_emulation_controller: EmulationViewController? = nil
     
   @IBOutlet weak var haptic_feedback_switch: UISwitch!
+  @IBOutlet weak var pad_opacity_slider: UISlider!
+  @IBOutlet weak var pad_opacity_label: UILabel!
     
   override func viewDidLoad()
   {
     super.viewDidLoad()
     
     getSwitchState()
+    // Set current opacity slider value
+    let currentOpacity = UserDefaults.standard.float(forKey: "pad_opacity_value")
+    let opacityString = String(currentOpacity).prefix(4)
+    pad_opacity_slider.value = currentOpacity
+    pad_opacity_label.text = String(opacityString)
     
     self.m_emulation_controller = self.parent?.presentingViewController?.children[0] as? EmulationViewController
     
     haptic_feedback_switch.addTarget(self, action: #selector(hapticFeedbackSwitchToggled(hapticSwitch:)), for: .valueChanged)
+    pad_opacity_slider.addTarget(self, action: #selector(padOpacitySliderChanged(opacitySlider:)), for: .valueChanged)
   }
   
   override func tableView(_ tableView: UITableView, willSelectRowAt indexPath: IndexPath) -> IndexPath?
@@ -77,5 +85,14 @@ class InGameConfigViewController: UITableViewController
   @objc func hapticFeedbackSwitchToggled(hapticSwitch: UISwitch)
   {
     UserDefaults.standard.set(hapticSwitch.isOn, forKey: "haptic_feedback_enabled")
+  }
+    
+  @objc func padOpacitySliderChanged(opacitySlider: UISlider)
+  {
+    let outputString = String(opacitySlider.value).prefix(4)
+    pad_opacity_label.text = String(outputString)
+    
+    UserDefaults.standard.set(opacitySlider.value, forKey: "pad_opacity_value")
+    m_emulation_controller?.setPadOpacity()
   }
 }

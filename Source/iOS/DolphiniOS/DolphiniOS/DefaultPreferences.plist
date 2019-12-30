@@ -4,5 +4,7 @@
 <dict>
 	<key>haptic_feedback_enabled</key>
 	<true/>
+	<key>pad_opacity_value</key>
+	<real>0.5</real>
 </dict>
 </plist>

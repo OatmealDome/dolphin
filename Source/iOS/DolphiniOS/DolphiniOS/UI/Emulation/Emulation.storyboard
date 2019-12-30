@@ -180,6 +180,51 @@
                                     </tableViewCell>
                                 </cells>
                             </tableViewSection>
+                            <tableViewSection headerTitle="Controller Opacity" id="dyL-qY-zhw">
+                                <cells>
+                                    <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="none" indentationWidth="10" id="vNZ-wm-PiS">
+                                        <rect key="frame" x="20" y="242.5" width="374" height="44"/>
+                                        <autoresizingMask key="autoresizingMask"/>
+                                        <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="vNZ-wm-PiS" id="cXV-7u-0Fx">
+                                            <rect key="frame" x="0.0" y="0.0" width="374" height="44"/>
+                                            <autoresizingMask key="autoresizingMask"/>
+                                            <subviews>
+                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="0.5" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="hZq-4u-zch">
+                                                    <rect key="frame" x="28" y="13" width="318" height="18"/>
+                                                    <fontDescription key="fontDescription" type="boldSystem" pointSize="17"/>
+                                                    <nil key="textColor"/>
+                                                    <nil key="highlightedColor"/>
+                                                </label>
+                                            </subviews>
+                                            <constraints>
+                                                <constraint firstItem="hZq-4u-zch" firstAttribute="top" secondItem="cXV-7u-0Fx" secondAttribute="topMargin" constant="2" id="5d3-bQ-kk5"/>
+                                                <constraint firstAttribute="bottomMargin" secondItem="hZq-4u-zch" secondAttribute="bottom" constant="2" id="SYp-Uf-gpY"/>
+                                                <constraint firstItem="hZq-4u-zch" firstAttribute="leading" secondItem="cXV-7u-0Fx" secondAttribute="leadingMargin" constant="8" id="ZYg-7X-yKf"/>
+                                                <constraint firstAttribute="trailingMargin" secondItem="hZq-4u-zch" secondAttribute="trailing" constant="8" id="ihA-hF-xW9"/>
+                                            </constraints>
+                                        </tableViewCellContentView>
+                                    </tableViewCell>
+                                    <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="none" indentationWidth="10" id="tfX-bV-QZb">
+                                        <rect key="frame" x="20" y="286.5" width="374" height="44"/>
+                                        <autoresizingMask key="autoresizingMask"/>
+                                        <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="tfX-bV-QZb" id="xrA-7V-bDI">
+                                            <rect key="frame" x="0.0" y="0.0" width="374" height="44"/>
+                                            <autoresizingMask key="autoresizingMask"/>
+                                            <subviews>
+                                                <slider opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" value="0.5" minValue="0.0" maxValue="1" translatesAutoresizingMaskIntoConstraints="NO" id="vrH-05-dci">
+                                                    <rect key="frame" x="14" y="8" width="346" height="29"/>
+                                                </slider>
+                                            </subviews>
+                                            <constraints>
+                                                <constraint firstAttribute="trailing" secondItem="vrH-05-dci" secondAttribute="trailing" constant="16" id="HUH-vI-zfv"/>
+                                                <constraint firstItem="vrH-05-dci" firstAttribute="top" secondItem="xrA-7V-bDI" secondAttribute="top" constant="8" id="IAO-dS-LgS"/>
+                                                <constraint firstItem="vrH-05-dci" firstAttribute="leading" secondItem="xrA-7V-bDI" secondAttribute="leading" constant="16" id="cAg-FR-FnU"/>
+                                                <constraint firstAttribute="bottom" secondItem="vrH-05-dci" secondAttribute="bottom" constant="8" id="eGb-Rn-f53"/>
+                                            </constraints>
+                                        </tableViewCellContentView>
+                                    </tableViewCell>
+                                </cells>
+                            </tableViewSection>
                         </sections>
                         <connections>
                             <outlet property="dataSource" destination="hkl-ry-5ed" id="SdV-Bu-v4G"/>
@@ -195,6 +240,8 @@
                     </navigationItem>
                     <connections>
                         <outlet property="haptic_feedback_switch" destination="QdO-xM-zI2" id="Tgl-tK-Ez0"/>
+                        <outlet property="pad_opacity_label" destination="hZq-4u-zch" id="czR-HI-0Xz"/>
+                        <outlet property="pad_opacity_slider" destination="vrH-05-dci" id="FFb-x6-wZK"/>
                         <segue destination="Zqj-KM-Ut1" kind="show" identifier="controller_toggle_gc" id="6Mm-nS-fc3"/>
                         <segue destination="eRi-h2-aMK" kind="show" identifier="controller_toggle_wii" id="LB6-ZK-zBB"/>
                     </connections>

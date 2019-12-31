@@ -53,6 +53,15 @@ class EmulationViewController: UIViewController, UIGestureRecognizerDelegate
     setupTapGestureRecognizer(m_wii_pad_sideways_view)
     setupTapGestureRecognizer(m_gc_pad_view)
     
+    // TODO: Get rid of this hack
+    if (m_visible_controller == -1)
+    {
+      setupTapGestureRecognizer(m_metal_view)
+      m_metal_view.isUserInteractionEnabled = true
+      setupTapGestureRecognizer(m_eagl_view)
+      m_eagl_view.isUserInteractionEnabled = true
+    }
+    
     let has_seen_initial_alert = UserDefaults.standard.bool(forKey: "seen_double_tap_two_fingers_alert")
     let has_seen_options_alert = UserDefaults.standard.bool(forKey: "seen_new_options_menu_alert")
     if (!has_seen_initial_alert)
@@ -187,13 +196,18 @@ class EmulationViewController: UIViewController, UIGestureRecognizerDelegate
   
   func setupTapGestureRecognizer(_ view: TCView)
   {
+    self.setupTapGestureRecognizer(view.real_view!)
+  }
+  
+  func setupTapGestureRecognizer(_ view: UIView)
+  {
     // Add a gesture recognizer for two finger double tapping
     let tap_recognizer = UITapGestureRecognizer(target: self, action: #selector(doubleTapped))
     tap_recognizer.numberOfTapsRequired = 2
     tap_recognizer.numberOfTouchesRequired = 2
     tap_recognizer.delegate = self
     
-    view.real_view!.addGestureRecognizer(tap_recognizer)
+    view.addGestureRecognizer(tap_recognizer)
   }
   
   @IBAction func doubleTapped(_ sender: UITapGestureRecognizer)
@@ -234,11 +248,17 @@ class EmulationViewController: UIViewController, UIGestureRecognizerDelegate
   
   func changeController(idx: Int)
   {
+    var proper_idx = idx
+    if (!MainiOS.isTouchscreenDeviceConnected(self.isWii))
+    {
+      proper_idx = -1
+    }
+    
     if (self.isWii)
     {
       for i in 0...self.m_wii_controllers.count - 1
       {
-        if (i == idx)
+        if (i == proper_idx)
         {
           self.m_wii_controllers[i].isUserInteractionEnabled = true
           self.m_wii_controllers[i].isHidden = false
@@ -254,7 +274,7 @@ class EmulationViewController: UIViewController, UIGestureRecognizerDelegate
     {
       for i in 0...self.m_gc_controllers.count - 1
       {
-        if (i == idx)
+        if (i == proper_idx)
         {
           self.m_gc_controllers[i].isUserInteractionEnabled = true
           self.m_gc_controllers[i].isHidden = false
@@ -267,7 +287,7 @@ class EmulationViewController: UIViewController, UIGestureRecognizerDelegate
       }
     }
     
-    self.m_visible_controller = idx
+    self.m_visible_controller = proper_idx
   }
   
   func setPadOpacity()

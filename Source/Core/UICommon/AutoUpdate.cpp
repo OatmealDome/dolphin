@@ -171,6 +171,8 @@ void AutoUpdateChecker::CheckForUpdate()
   if (!resp)
   {
     ERROR_LOG_FMT(COMMON, "Auto-update request failed");
+    OnErrorOccurred(CheckError::RequestFailed);
+
     return;
   }
   const std::string contents(reinterpret_cast<char*>(resp->data()), resp->size());
@@ -181,6 +183,8 @@ void AutoUpdateChecker::CheckForUpdate()
   if (!err.empty())
   {
     ERROR_LOG_FMT(COMMON, "Invalid JSON received from auto-update service: {}", err);
+    OnErrorOccurred(CheckError::InvalidJson);
+
     return;
   }
   picojson::object obj = json.get<picojson::object>();
@@ -188,6 +192,8 @@ void AutoUpdateChecker::CheckForUpdate()
   if (obj["status"].get<std::string>() != "outdated")
   {
     INFO_LOG_FMT(COMMON, "Auto-update status: we are up to date.");
+    OnErrorOccurred(CheckError::AlreadyUpToDate);
+
     return;
   }
 

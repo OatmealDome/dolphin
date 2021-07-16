@@ -18,6 +18,19 @@ public:
 
   static bool SystemSupportsAutoUpdates();
 
+  // Passed to the OnErrorOccurred callback.
+  enum class CheckError
+  {
+    // The HTTP request failed.
+    RequestFailed,
+
+    // The JSON received from the server is not valid.
+    InvalidJson,
+
+    // We're already up to date.
+    AlreadyUpToDate
+  };
+
   struct NewVersionInformation
   {
     // Name (5.0-1234) and revision hash of the new version.
@@ -43,4 +56,5 @@ public:
 
 protected:
   virtual void OnUpdateAvailable(const NewVersionInformation& info) = 0;
+  virtual void OnErrorOccurred(CheckError error) = 0;
 };

@@ -18,6 +18,12 @@ public:
 
   static bool SystemSupportsAutoUpdates();
 
+  enum class ShouldSilentlyFail
+  {
+    Yes,
+    No,
+  };
+
   // Passed to the OnErrorOccurred callback.
   enum class CheckError
   {
@@ -28,7 +34,7 @@ public:
     InvalidJson,
 
     // We're already up to date.
-    AlreadyUpToDate
+    AlreadyUpToDate,
   };
 
   struct NewVersionInformation

@@ -13,33 +13,58 @@
 
 #include "Common/Version.h"
 
+#include "DolphinQt/QtUtils/ModalMessageBox.h"
 #include "DolphinQt/QtUtils/RunOnObject.h"
 #include "DolphinQt/Settings.h"
 
 // Refer to docs/autoupdate_overview.md for a detailed overview of the autoupdate process
 
-Updater::Updater(QWidget* parent) : m_parent(parent)
+Updater::Updater(QWidget* parent, ShouldSilentlyFail silently_fail)
+    : m_parent(parent), m_silently_fail(silently_fail)
 {
   connect(this, &QThread::finished, this, &QObject::deleteLater);
 }
 
 void Updater::run()
 {
-  AutoUpdateChecker::CheckForUpdate();
+  CheckForUpdate();
 }
 
-bool Updater::CheckForUpdate()
+void Updater::OnErrorOccurred(CheckError error)
 {
-  m_update_available = false;
-  AutoUpdateChecker::CheckForUpdate();
+  if (m_silently_fail == ShouldSilentlyFail::Yes)
+  {
+    return;
+  }
 
-  return m_update_available;
+  switch (error)
+  {
+  case CheckError::AlreadyUpToDate:
+    ModalMessageBox::information(
+        m_parent, tr("Update"),
+        tr("You are running the latest version available on this update track."));
+    break;
+  case CheckError::RequestFailed:
+    ModalMessageBox::critical(m_parent, tr("Update failed"),
+                              tr("Could not download update information. "
+                                 "Please check your Internet connection and try again."));
+    break;
+  case CheckError::InvalidJson:
+    ModalMessageBox::critical(m_parent, tr("Update failed"),
+                              tr("The server returned an invalid response. "
+                                 "Please try again later."));
+    break;
+  default:
+    ModalMessageBox::critical(m_parent, tr("Update failed"),
+                              tr("An unknown error has occurred. "
+                                 "Please check your Internet connection and try again."));
+    break;
+  }
 }
 
 void Updater::OnUpdateAvailable(const NewVersionInformation& info)
 {
   bool later = false;
-  m_update_available = true;
 
   std::optional<int> choice = RunOnObject(m_parent, [&] {
     QDialog* dialog = new QDialog(m_parent);

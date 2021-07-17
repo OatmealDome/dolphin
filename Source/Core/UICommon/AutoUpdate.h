@@ -35,6 +35,9 @@ public:
 
     // We're already up to date.
     AlreadyUpToDate,
+
+    // Couldn't launch updater.
+    FailedToLaunchUpdater,
   };
 
   struct NewVersionInformation
@@ -58,7 +61,7 @@ public:
     NO_RESTART_AFTER_UPDATE = 0,
     RESTART_AFTER_UPDATE,
   };
-  void TriggerUpdate(const NewVersionInformation& info, RestartMode restart_mode);
+  bool TriggerUpdate(const NewVersionInformation& info, RestartMode restart_mode);
 
 protected:
   virtual void OnUpdateAvailable(const NewVersionInformation& info) = 0;

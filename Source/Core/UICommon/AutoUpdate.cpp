@@ -210,14 +210,14 @@ void AutoUpdateChecker::CheckForUpdate()
   OnUpdateAvailable(nvi);
 }
 
-void AutoUpdateChecker::TriggerUpdate(const AutoUpdateChecker::NewVersionInformation& info,
+bool AutoUpdateChecker::TriggerUpdate(const AutoUpdateChecker::NewVersionInformation& info,
                                       AutoUpdateChecker::RestartMode restart_mode)
 {
   // Check to make sure we don't already have an update triggered
   if (s_update_triggered)
   {
     WARN_LOG_FMT(COMMON, "Auto-update: received a redundant trigger request, ignoring");
-    return;
+    return false;
   }
 
   s_update_triggered = true;
@@ -265,13 +265,21 @@ void AutoUpdateChecker::TriggerUpdate(const AutoUpdateChecker::NewVersionInforma
   else
   {
     ERROR_LOG_FMT(COMMON, "Could not start updater process: error={}", GetLastError());
+    OnErrorOccurred(CheckError::FailedToLaunchUpdater);
+
+    return false;
   }
 #else
   if (popen(command_line.c_str(), "r") == nullptr)
   {
     ERROR_LOG_FMT(COMMON, "Could not start updater process: error={}", errno);
+    OnErrorOccurred(CheckError::FailedToLaunchUpdater);
+
+    return false;
   }
 #endif
 
 #endif
+
+  return true;
 }

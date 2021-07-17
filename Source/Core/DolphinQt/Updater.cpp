@@ -54,6 +54,9 @@ void Updater::OnErrorOccurred(CheckError error)
                               tr("The server returned an invalid response. "
                                  "Please try again later."));
     break;
+  case CheckError::FailedToLaunchUpdater:
+    ModalMessageBox::critical(m_parent, tr("Update failed"), tr("Could not launch the updater."));
+    break;
   default:
     ModalMessageBox::critical(m_parent, tr("Update failed"),
                               tr("An unknown error has occurred. "
@@ -117,10 +120,11 @@ void Updater::OnUpdateAvailable(const NewVersionInformation& info)
 
   if (choice && *choice == QDialog::Accepted)
   {
-    TriggerUpdate(info, later ? AutoUpdateChecker::RestartMode::NO_RESTART_AFTER_UPDATE :
-                                AutoUpdateChecker::RestartMode::RESTART_AFTER_UPDATE);
+    bool result =
+        TriggerUpdate(info, later ? AutoUpdateChecker::RestartMode::NO_RESTART_AFTER_UPDATE :
+                                    AutoUpdateChecker::RestartMode::RESTART_AFTER_UPDATE);
 
-    if (!later)
+    if (!later && result)
     {
       RunOnObject(m_parent, [this] {
         m_parent->close();

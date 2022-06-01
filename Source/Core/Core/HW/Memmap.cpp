@@ -47,6 +47,7 @@ namespace Memory
 // Store the MemArena here
 u8* physical_base = nullptr;
 u8* logical_base = nullptr;
+u8* page_mappings_base = nullptr; // for virtmem restricted fastmem
 static bool is_fastmem_arena_initialized = false;
 
 // The MemArena class
@@ -222,6 +223,8 @@ struct LogicalMemoryView
 static std::array<PhysicalMemoryRegion, 4> s_physical_regions;
 
 static std::vector<LogicalMemoryView> logical_mapped_entries;
+;
+static std::array<void*, 0x20000> s_page_mappings;
 
 void Init()
 {
@@ -263,7 +266,7 @@ void Init()
   // If MMU is turned off in GameCube mode, turn on fake VMEM hack.
   // The fake VMEM hack's address space is above the memory space that we
   // allocate on 32bit targets, so disable it there.
-  fake_vmem = !wii && !mmu;
+//  fake_vmem = !wii && !mmu;
 #endif
 
   u32 mem_size = 0;
@@ -307,11 +310,11 @@ void Init()
 
 bool InitFastmemArena()
 {
-#if _ARCH_32
+//#if _ARCH_32
   const size_t memory_size = 0x31000000;
-#else
-  const size_t memory_size = 0x400000000;
-#endif
+//#else
+//  const size_t memory_size = 0x400000000;
+//#endif
   physical_base = g_arena.ReserveMemoryRegion(memory_size);
 
   if (!physical_base)
@@ -325,7 +328,7 @@ bool InitFastmemArena()
     if (!region.active)
       continue;
 
-    u8* base = physical_base + region.physical_address;
+    u8* base = physical_base + (region.physical_address & 0x3FFFFFFF);
     u8* view = (u8*)g_arena.MapInMemoryRegion(region.shm_position, region.size, base);
 
     if (base != view)
@@ -338,8 +341,10 @@ bool InitFastmemArena()
   }
 
 #ifndef _ARCH_32
-  logical_base = physical_base + 0x200000000;
+//  logical_base = physical_base + 0x200000000;
 #endif
+  
+  page_mappings_base = reinterpret_cast<u8*>(&s_page_mappings[0]);
 
   is_fastmem_arena_initialized = true;
   return true;
@@ -355,6 +360,12 @@ void UpdateLogicalMemory(const PowerPC::BatTable& dbat_table)
     g_arena.UnmapFromMemoryRegion(entry.mapped_pointer, entry.mapped_size);
   }
   logical_mapped_entries.clear();
+
+  for (size_t i = 0; i < s_page_mappings.size(); i++)
+  {
+    s_page_mappings[i] = nullptr;
+  }
+
   for (u32 i = 0; i < dbat_table.size(); ++i)
   {
     if (dbat_table[i] & PowerPC::BAT_PHYSICAL_BIT)
@@ -379,7 +390,7 @@ void UpdateLogicalMemory(const PowerPC::BatTable& dbat_table)
           u8* base = logical_base + logical_address + intersection_start - translated_address;
           u32 mapped_size = intersection_end - intersection_start;
 
-          void* mapped_pointer = g_arena.MapInMemoryRegion(position, mapped_size, base);
+          /*void* mapped_pointer = g_arena.MapInMemoryRegion(position, mapped_size, base);
           if (!mapped_pointer)
           {
             PanicAlertFmt("Memory::UpdateLogicalMemory(): Failed to map memory region at 0x{:08X} "
@@ -387,11 +398,31 @@ void UpdateLogicalMemory(const PowerPC::BatTable& dbat_table)
                           intersection_start, mapped_size, logical_address);
             exit(0);
           }
-          logical_mapped_entries.push_back({mapped_pointer, mapped_size});
+          logical_mapped_entries.push_back({mapped_pointer, mapped_size});*/
+          
+          u32 ttb_address = logical_address + intersection_start - translated_address;
+          u8* ttb_mapped_pointer = *physical_region.out_pointer + intersection_start - mapping_address;
+
+          s_page_mappings[ttb_address >> PowerPC::BAT_INDEX_SHIFT] = ttb_mapped_pointer;
         }
       }
     }
   }
+
+  for (size_t i = 0; i < s_page_mappings.size(); i++)
+  {
+    void* entry = s_page_mappings[i];
+    if (entry == nullptr)
+    {
+      continue;
+    }
+    
+    ERROR_LOG_FMT(MEMMAP, "Memory::UpdateLogicalMemory(): page 0x{:08X} "
+                  "mapped region {:08X}.",
+                  i << PowerPC::BAT_INDEX_SHIFT, entry);
+  }
+  
+  ERROR_LOG_FMT(MEMMAP, "Memory::UpdateLogicalMemory(): done, entries {:08X}", (void*)&s_page_mappings[0]);
 }
 
 void DoState(PointerWrap& p)

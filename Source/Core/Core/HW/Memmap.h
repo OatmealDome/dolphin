@@ -30,6 +30,9 @@ namespace Memory
 extern u8* physical_base;
 extern u8* logical_base;
 
+//
+extern u8* page_mappings_base;
+
 // These are guaranteed to point to "low memory" addresses (sub-32-bit).
 extern u8* m_pRAM;
 extern u8* m_pEXRAM;

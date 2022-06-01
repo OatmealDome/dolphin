@@ -373,10 +373,10 @@ void Arm64GPRCache::GetAllocationOrder()
   // Callee saved registers first in hopes that we will keep everything stored there first
   static constexpr auto allocation_order = {
       // Callee saved
-      ARM64Reg::W27,
+      //ARM64Reg::W27,
       ARM64Reg::W26,
-      ARM64Reg::W25,
-      ARM64Reg::W24,
+      //ARM64Reg::W25,
+      //ARM64Reg::W24,
       ARM64Reg::W23,
       ARM64Reg::W22,
       ARM64Reg::W21,

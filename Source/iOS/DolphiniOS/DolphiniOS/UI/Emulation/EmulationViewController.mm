@@ -100,7 +100,7 @@
         }
         else if (controller.microGamepad != nil)
         {
-          controller.extendedGamepad.buttonMenu.pressedChangedHandler = handler;
+          controller.microGamepad.buttonMenu.pressedChangedHandler = handler;
         }
       }
       else

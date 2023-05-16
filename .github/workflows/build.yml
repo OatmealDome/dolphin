@@ -25,6 +25,9 @@ jobs:
             build/*
             !build/Binaries
           key: build-linux
+      
+      - name: Setup upterm session
+        uses: lhotari/action-upterm@v1
 
       - name: Configure
         run: |

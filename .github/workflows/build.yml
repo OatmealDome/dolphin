@@ -31,7 +31,7 @@ jobs:
           apt install -y openssh-client
       
       - name: Start Upterm Session
-        uses: lhotari/action-upterm@v1
+        uses: mxschmitt/action-tmate@v3
 
       - name: Configure
         run: |

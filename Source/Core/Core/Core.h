@@ -7,6 +7,8 @@
 // This is another part of the emu that needs cleaning - Core.cpp really has
 // too much random junk inside.
 
+// Testing comment
+
 #pragma once
 
 #include <functional>

@@ -54,6 +54,12 @@ jobs:
           cd build
           ninja
       
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: linux
+          path: build/Binaries
+      
       - name: Cleanup
         run: |
           curl -L -X DELETE -H "Accept: application/vnd.github+json" -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" -H "X-GitHub-Api-Version: 2022-11-28" https://api.github.com/repos/OatmealDome/dolphin/actions/caches?key=build-linux

@@ -26,7 +26,11 @@ jobs:
             !build/Binaries
           key: build-linux
       
-      - name: Setup upterm session
+      - name: Install SSH Client
+        run: |
+          apt install -y openssh-client
+      
+      - name: Start Upterm Session
         uses: lhotari/action-upterm@v1
 
       - name: Configure

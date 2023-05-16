@@ -8,7 +8,6 @@
 // too much random junk inside.
 
 // Testing comment
-// Testing comment 2
 
 #pragma once
 

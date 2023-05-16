@@ -22,7 +22,7 @@ jobs:
         run: |
           mkdir build
           cd build
-          cmake ../dolphin -G Ninja -DCMAKE_PREFIX_PATH=${{ github.workspace }}/qt/latest/amd64 -DSTEAM=ON -DENABLE_AUTOUPDATE=OFF -DENABLE_EVDEV=OFF -DENABLE_LLVM=OFF -DENABLE_SDL=ON
+          cmake ../dolphin -G Ninja -DCMAKE_PREFIX_PATH=$PWD/../qt/latest/amd64 -DSTEAM=ON -DENABLE_AUTOUPDATE=OFF -DENABLE_EVDEV=OFF -DENABLE_LLVM=OFF -DENABLE_SDL=ON
       
       - name: Build
         run: |

@@ -38,9 +38,14 @@ jobs:
       #- name: Start Upterm Session
       #  uses: mxschmitt/action-tmate@v3
 
+      - name: Add Backports
+        run: |
+          echo "deb http://deb.debian.org/debian bullseye-backports main" >> /etc/apt/sources.list
+          apt update
+
       - name: Install Tools
         run: |
-          apt install -y ccache gh
+          apt install -y ccache gh/bullseye-backports
 
       - name: Set CCACHE_DIR
         run: |

@@ -38,9 +38,9 @@ jobs:
       #- name: Start Upterm Session
       #  uses: mxschmitt/action-tmate@v3
 
-      - name: Install ccache
+      - name: Install Tools
         run: |
-          apt install -y ccache
+          apt install -y ccache gh
 
       - name: Set CCACHE_DIR
         run: |

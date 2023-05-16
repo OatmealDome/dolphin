@@ -5,6 +5,10 @@ jobs:
     runs-on: ubuntu-latest
     container: registry.gitlab.steamos.cloud/steamrt/sniper/sdk
 
+    permissions:
+      actions: write
+      contents: read
+
     steps:
       - name: Checkout Dolphin
         uses: actions/checkout@v3
@@ -54,6 +58,16 @@ jobs:
           cd build
           ninja
       
+      - name: Cleanup
+        run: |
+          gh extension install actions/gh-actions-cache
+          
+          REPO=${{ github.repository }}
+
+          gh actions-cache delete build-linux -R $REPO --confirm
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Save Build Cache
         uses: actions/cache/save@v3
         with:

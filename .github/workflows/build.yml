@@ -38,15 +38,6 @@ jobs:
       #- name: Start Upterm Session
       #  uses: mxschmitt/action-tmate@v3
 
-      - name: Add Backports
-        run: |
-          echo "deb http://deb.debian.org/debian bullseye-backports main" >> /etc/apt/sources.list
-          apt update
-
-      - name: Install Tools
-        run: |
-          apt install -y ccache gh/bullseye-backports
-
       - name: Set CCACHE_DIR
         run: |
           mkdir -p ccache
@@ -65,13 +56,7 @@ jobs:
       
       - name: Cleanup
         run: |
-          gh extension install actions/gh-actions-cache
-          
-          REPO=${{ github.repository }}
-
-          gh actions-cache delete build-linux -R $REPO --confirm
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          curl -L -X DELETE -H "Accept: application/vnd.github+json" -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" -H "X-GitHub-Api-Version: 2022-11-28" https://api.github.com/repos/OatmealDome/dolphin/actions/caches?key=build-linux
 
       - name: Save Build Cache
         uses: actions/cache/save@v3

@@ -17,10 +17,16 @@ jobs:
         with:
           repository: dolphin-emu/ext-steam-runtime-qt
           path: qt
+      
+      - name: Restore Build Cache
+        uses: actions/cache/restore@v3
+        with:
+          path: build
+          key: build-linux
 
       - name: Configure
         run: |
-          mkdir build
+          mkdir -p build
           cd build
           cmake ../dolphin -G Ninja -DCMAKE_PREFIX_PATH=$PWD/../qt/latest/amd64 -DSTEAM=ON -DENABLE_AUTOUPDATE=OFF -DENABLE_EVDEV=OFF -DENABLE_LLVM=OFF -DENABLE_SDL=ON
       
@@ -28,3 +34,11 @@ jobs:
         run: |
           cd build
           ninja
+      
+      - name: Save Build Cache
+        uses: actions/cache/save@v3
+        with:
+          path: |
+            build/*
+            !build/Binaries
+          key: build-linux

@@ -21,7 +21,9 @@ jobs:
       - name: Restore Build Cache
         uses: actions/cache/restore@v3
         with:
-          path: build
+          path: |
+            build/*
+            !build/Binaries
           key: build-linux
 
       - name: Configure

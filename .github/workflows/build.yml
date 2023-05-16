@@ -41,7 +41,7 @@ jobs:
       - name: Set CCACHE_DIR
         run: |
           mkdir -p ccache
-          echo "CCACHE_DIR=$(PWD)/ccache" >> $GITHUB_ENV
+          echo "CCACHE_DIR=$PWD/ccache" >> $GITHUB_ENV
 
       - name: Configure
         run: |

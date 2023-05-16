@@ -24,20 +24,30 @@ jobs:
           path: |
             build/*
             !build/Binaries
+            ccache/*
           key: build-linux
       
-      - name: Install SSH Client
-        run: |
-          apt install -y openssh-client
+      #- name: Install SSH Client
+      #  run: |
+      #    apt install -y openssh-client
       
-      - name: Start Upterm Session
-        uses: mxschmitt/action-tmate@v3
+      #- name: Start Upterm Session
+      #  uses: mxschmitt/action-tmate@v3
+
+      - name: Install ccache
+        run: |
+          apt install -y ccache
+
+      - name: Set CCACHE_DIR
+        run: |
+          mkdir -p ccache
+          echo "CCACHE_DIR=$(PWD)/ccache" >> $GITHUB_ENV
 
       - name: Configure
         run: |
           mkdir -p build
           cd build
-          cmake ../dolphin -G Ninja -DCMAKE_PREFIX_PATH=$PWD/../qt/latest/amd64 -DSTEAM=ON -DENABLE_AUTOUPDATE=OFF -DENABLE_EVDEV=OFF -DENABLE_LLVM=OFF -DENABLE_SDL=ON
+          cmake ../dolphin -G Ninja -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_PREFIX_PATH=$PWD/../qt/latest/amd64 -DSTEAM=ON -DENABLE_AUTOUPDATE=OFF -DENABLE_EVDEV=OFF -DENABLE_LLVM=OFF -DENABLE_SDL=ON
       
       - name: Build
         run: |
@@ -50,4 +60,5 @@ jobs:
           path: |
             build/*
             !build/Binaries
+            ccache/*
           key: build-linux

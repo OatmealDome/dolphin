@@ -4,7 +4,7 @@ jobs:
   build-linux:
     runs-on: ubuntu-latest
     container: registry.gitlab.steamos.cloud/steamrt/sniper/sdk
-    
+
     steps:
       - name: Checkout Dolphin
         uses: actions/checkout@v3
@@ -22,7 +22,7 @@ jobs:
         run: |
           mkdir build
           cd build
-          cmake ../dolphin -G Ninja -DCMAKE_PREFIX_PATH=${{ github.workspace }}/qt -DSTEAM=ON -DENABLE_AUTOUPDATE=OFF -DENABLE_EDEV=OFF -DENABLE_LLVM=OFF -DENABLE_SDL=ON
+          cmake ../dolphin -G Ninja -DCMAKE_PREFIX_PATH=${{ github.workspace }}/qt -DSTEAM=ON -DENABLE_AUTOUPDATE=OFF -DENABLE_EVDEV=OFF -DENABLE_LLVM=OFF -DENABLE_SDL=ON
       
       - name: Build
         run: |

@@ -97,6 +97,8 @@
 #include "jni/AndroidCommon/IDCache.h"
 #endif
 
+// Testing comment
+
 namespace Core
 {
 static bool s_wants_determinism;

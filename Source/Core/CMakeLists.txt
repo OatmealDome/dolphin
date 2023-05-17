@@ -30,3 +30,7 @@ endif()
 if (WIN32 AND ENABLE_AUTOUPDATE)
   add_subdirectory(WinUpdater)
 endif()
+
+if (STEAM)
+  add_subdirectory(SteamworksCommon)
+endif()

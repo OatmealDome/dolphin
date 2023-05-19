@@ -39,6 +39,7 @@
 #include "DolphinQt/Updater.h"
 
 #include "UICommon/CommandLineParse.h"
+#include "UICommon/Steam/Steam.h"
 #include "UICommon/UICommon.h"
 
 static bool QtMsgAlertHandler(const char* caption, const char* text, bool yes_no,
@@ -179,6 +180,17 @@ int main(int argc, char* argv[])
 
   // Hook up alerts from core
   Common::RegisterMsgAlertHandler(QtMsgAlertHandler);
+
+//#ifdef STEAM
+  if (!Steam::Init())
+  {
+    PanicAlertFmt("Failed to initialize Steam helper");
+  }
+
+  Steam::FetchUsername();
+//#endif
+
+
 
   // Hook up translations
   Translation::Initialize();

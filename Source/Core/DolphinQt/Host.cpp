@@ -41,6 +41,8 @@
 #include "VideoCommon/Present.h"
 #include "VideoCommon/VideoConfig.h"
 
+#include "UICommon/Steam/Steam.h"
+
 static thread_local bool tls_is_host_thread = false;
 
 Host::Host()
@@ -286,6 +288,9 @@ void Host_TitleChanged()
   // TODO: Not sure if the NetPlay check is needed.
   if (!NetPlay::IsNetPlayRunning())
     Discord::UpdateDiscordPresence();
+#endif
+#ifdef STEAM
+  Steam::UpdateRichPresence();
 #endif
 }
 

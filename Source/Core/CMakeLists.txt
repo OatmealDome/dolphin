@@ -32,5 +32,6 @@ if (WIN32 AND ENABLE_AUTOUPDATE)
 endif()
 
 if (STEAM)
-  add_subdirectory(SteamworksCommon)
+  add_subdirectory(SteamHelperCommon)
+  add_subdirectory(SteamHelper)
 endif()

@@ -10,11 +10,15 @@
 
 #include <SFML/Network/Packet.hpp>
 
-class RpcConnection
+#include "PipeEnd.h"
+
+namespace Steam
+{
+class IpcConnection
 {
 public:
-  RpcConnection(int incoming_fd, int outgoing_fd);
-  ~RpcConnection();
+  IpcConnection(PipeHandle in_handle, PipeHandle out_handle);
+  virtual ~IpcConnection();
 
   bool IsRunning();
 
@@ -27,8 +31,8 @@ private:
 
   void RequestStop();
 
-  int m_incoming_fd;
-  int m_outgoing_fd;
+  PipeEnd m_incoming_pipe;
+  PipeEnd m_outgoing_pipe;
 
   std::mutex m_send_mutex;
 
@@ -37,4 +41,4 @@ private:
 
   std::atomic_bool m_is_running;
 };
-
+}  // namespace Steam

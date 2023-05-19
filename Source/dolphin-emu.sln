@@ -89,6 +89,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "spng", "..\Externals\libspn
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "rcheevos", "..\Externals\rcheevos\rcheevos.vcxproj", "{CC99A910-3752-4465-95AA-7DC240D92A99}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SteamHelper", "Core\SteamHelper\SteamHelper.vcxproj", "{98FDAD4E-3E17-48C2-A876-513ABDE7EAFA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|ARM64 = Debug|ARM64
@@ -429,6 +431,14 @@ Global
 		{CC99A910-3752-4465-95AA-7DC240D92A99}.Release|ARM64.Build.0 = Release|ARM64
 		{CC99A910-3752-4465-95AA-7DC240D92A99}.Release|x64.ActiveCfg = Release|x64
 		{CC99A910-3752-4465-95AA-7DC240D92A99}.Release|x64.Build.0 = Release|x64
+		{98FDAD4E-3E17-48C2-A876-513ABDE7EAFA}.Debug|ARM64.ActiveCfg = Debug|x64
+		{98FDAD4E-3E17-48C2-A876-513ABDE7EAFA}.Debug|ARM64.Build.0 = Debug|x64
+		{98FDAD4E-3E17-48C2-A876-513ABDE7EAFA}.Debug|x64.ActiveCfg = Debug|x64
+		{98FDAD4E-3E17-48C2-A876-513ABDE7EAFA}.Debug|x64.Build.0 = Debug|x64
+		{98FDAD4E-3E17-48C2-A876-513ABDE7EAFA}.Release|ARM64.ActiveCfg = Release|x64
+		{98FDAD4E-3E17-48C2-A876-513ABDE7EAFA}.Release|ARM64.Build.0 = Release|x64
+		{98FDAD4E-3E17-48C2-A876-513ABDE7EAFA}.Release|x64.ActiveCfg = Release|x64
+		{98FDAD4E-3E17-48C2-A876-513ABDE7EAFA}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

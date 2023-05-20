@@ -18,6 +18,7 @@
     <TargetName>SteamHelper</TargetName>
   </PropertyGroup>
   <ItemGroup>
+    <ClInclude Include="..\SteamHelperCommon\Constants.h" />
     <ClInclude Include="..\SteamHelperCommon\IpcConnection.h" />
     <ClInclude Include="..\SteamHelperCommon\MessageType.h" />
     <ClInclude Include="..\SteamHelperCommon\PipeEnd.h" />

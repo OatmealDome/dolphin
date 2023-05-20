@@ -9,7 +9,7 @@
 
 #include <SFML/Network/Packet.hpp>
 
-#include "PipeEnd.h"
+#include "SteamHelperCommon/PipeEnd.h"
 
 namespace Steam
 {

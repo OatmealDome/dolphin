@@ -1,4 +1,4 @@
-#include "PipeEnd.h"
+#include "SteamHelperCommon/PipeEnd.h"
 
 namespace Steam
 {

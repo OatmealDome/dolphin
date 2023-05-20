@@ -13,7 +13,10 @@
 #include "Common/CommonFuncs.h"
 #include "Common/CommonPaths.h"
 #include "Common/FileUtil.h"
+
 #include "Core/ConfigManager.h"
+
+#include "SteamHelperCommon/Constants.h"
 
 namespace Steam
 {
@@ -34,7 +37,7 @@ bool Init()
   const std::string path(File::GetExeDirectory() + DIR_SEP + "SteamHelper.exe");
   const auto wpath = UTF8ToWString(path);
 
-  std::wstring cmdline = L"\"" + wpath + L"\" SecretStringFromDolphin";
+  const std::wstring cmdline = L"\"" + wpath + L"\" SecretStringFromDolphin";
 
   STARTUPINFO sinfo{.cb = sizeof(sinfo)};
   sinfo.hStdInput = cts_read;
@@ -84,10 +87,12 @@ bool Init()
     close(server_to_client[0]);
     close(client_to_server[1]);
 
-    std::string incoming_fd_str = std::to_string(client_to_server[0]);
-    std::string outgoing_fd_str = std::to_string(server_to_client[1]);
+    dup2(client_to_server[0], STDIN_FILENO);
+    dup2(server_to_client[1], STDOUT_FILENO);
 
-    execl("SteamHelper", "SteamHelper", incoming_fd_str.c_str(), outgoing_fd_str.c_str(), NULL);
+    const std::string path(File::GetExeDirectory() + DIR_SEP + "dolphin-steam-helper");
+
+    execl(path.c_str(), "dolphin-steam-helper", STEAM_HELPER_SECRET_STRING, NULL);
   }
   else
   {

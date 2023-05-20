@@ -522,6 +522,7 @@
     <ClInclude Include="InputCommon\InputConfig.h" />
     <ClInclude Include="InputCommon\InputProfile.h" />
     <ClInclude Include="InputCommon\KeyboardStatus.h" />
+    <ClInclude Include="SteamHelperCommon\Constants.h" />
     <ClInclude Include="SteamHelperCommon\IpcConnection.h" />
     <ClInclude Include="SteamHelperCommon\MessageType.h" />
     <ClInclude Include="SteamHelperCommon\PipeEnd.h" />

@@ -5,6 +5,8 @@
 
 #include <steam/steam_api.h>
 
+#include "SteamHelperCommon/Constants.h"
+#include "SteamHelperCommon/InitResult.h"
 #include "SteamHelperCommon/MessageType.h"
 
 namespace Steam
@@ -57,7 +59,18 @@ void HelperServer::ReceiveInitRequest(uint32_t call_id)
     replyPacket << static_cast<uint8_t>(MessageType::InitReply);
     replyPacket << call_id;
 
-    replyPacket << SteamAPI_Init();
+    if (SteamAPI_RestartAppIfNecessary(STEAM_APP_ID))
+    {
+        replyPacket << static_cast<uint8_t>(InitResult::RestartingFromSteam);
+    }
+    else if (!SteamAPI_Init())
+    {
+        replyPacket << static_cast<uint8_t>(InitResult::Failure);
+    }
+    else
+    {
+        replyPacket << static_cast<uint8_t>(InitResult::Success);
+    }
     
     Send(replyPacket);
 }

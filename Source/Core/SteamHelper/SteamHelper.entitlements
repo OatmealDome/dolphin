@@ -2,7 +2,7 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-    <!-- This is needed to use adhoc signed linked libraries -->
+    <!-- libsteam_api.dylib is signed by Valve's developer certificate, not ours -->
  	<key>com.apple.security.cs.disable-library-validation</key> 
   	<true/>
 </dict>

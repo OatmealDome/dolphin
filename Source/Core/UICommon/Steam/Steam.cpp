@@ -20,12 +20,13 @@
 #include "Core/ConfigManager.h"
 
 #include "SteamHelperCommon/Constants.h"
+#include "SteamHelperCommon/InitResult.h"
 
 namespace Steam
 {
 static std::unique_ptr<HelperClient> s_client;
 
-bool Init()
+InitResult Init()
 {
 #ifdef _WIN32
   HANDLE cts_read, cts_write;
@@ -40,7 +41,7 @@ bool Init()
   const std::string path(File::GetExeDirectory() + DIR_SEP + "SteamHelper.exe");
   const auto wpath = UTF8ToWString(path);
 
-  const std::wstring cmdline = L"\"" + wpath + L"\" SecretStringFromDolphin";
+  const std::wstring cmdline = L"\"" + wpath + L"\" " + Common::UTF8ToWString(std::string(STEAM_HELPER_SECRET_STRING));
 
   STARTUPINFO sinfo{.cb = sizeof(sinfo)};
   sinfo.hStdInput = cts_read;
@@ -53,7 +54,7 @@ bool Init()
                       &sinfo, &pinfo))
   {
     std::string lastError = Common::GetLastErrorString();
-    return false;
+    return InitResult::Failure;
   }
 
   CloseHandle(cts_read);
@@ -96,20 +97,20 @@ bool Init()
 
   if (!s_client->IsRunning())
   {
-    return false;
+    return InitResult::Failure;
   }
 
   auto result = s_client->SendMessageWithReply(MessageType::InitRequest).get();
 
   if (!result.ipcSuccess)
   {
-    return false;
+    return InitResult::Failure;
   }
 
-  bool api_init_result;
-  result.payload >> api_init_result;
+  uint8_t init_result_raw;
+  result.payload >> init_result_raw;
 
-  return api_init_result;
+  return static_cast<InitResult>(init_result_raw);
 }
 
 void Shutdown()

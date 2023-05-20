@@ -3,8 +3,6 @@
 
 #pragma once
 
-#include <cstdint>
-
 namespace Steam
 {
 enum class MessageType : uint8_t
@@ -18,4 +16,4 @@ enum class MessageType : uint8_t
   SetRichPresenceReply,
   ShutdownRequest
 };
-}
+}  // namespace Steam

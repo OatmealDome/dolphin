@@ -38,6 +38,8 @@
 #include "DolphinQt/Translation.h"
 #include "DolphinQt/Updater.h"
 
+#include "SteamHelperCommon/InitResult.h"
+
 #include "UICommon/CommandLineParse.h"
 #include "UICommon/Steam/Steam.h"
 #include "UICommon/UICommon.h"
@@ -181,19 +183,24 @@ int main(int argc, char* argv[])
   // Hook up alerts from core
   Common::RegisterMsgAlertHandler(QtMsgAlertHandler);
 
+  // Hook up translations
+  Translation::Initialize();
+
 //#ifdef STEAM
-  if (!Steam::Init())
+  Steam::InitResult steam_init_result = Steam::Init();
+  if (steam_init_result == Steam::InitResult::Failure)
   {
-    PanicAlertFmt("Failed to initialize Steam helper");
+    PanicAlertFmtT("Failed to initialize Steam helper");
+    return 0;
+  }
+  else if (steam_init_result == Steam::InitResult::RestartingFromSteam)
+  {
+    // We're not being launched by Steam. Exit immediately, as Steam will relaunch Dolphin for us.
+    return 0;
   }
 
   Steam::FetchUsername();
 //#endif
-
-
-
-  // Hook up translations
-  Translation::Initialize();
 
   // Whenever the event loop is about to go to sleep, dispatch the jobs
   // queued in the Core first.

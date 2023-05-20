@@ -3,9 +3,11 @@
 
 #pragma once
 
+enum class InitResult;
+
 namespace Steam
 {
-bool Init();
+InitResult Init();
 void Shutdown();
 void FetchUsername();
 void SetRichPresence(const std::string& value);

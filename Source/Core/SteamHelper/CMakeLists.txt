@@ -39,3 +39,10 @@ if(APPLE)
       COMMAND /usr/bin/codesign -f -s "${MACOS_CODE_SIGNING_IDENTITY}" --deep --options=runtime --entitlements "${CMAKE_CURRENT_SOURCE_DIR}/SteamHelper.entitlements" "$<TARGET_FILE:SteamHelper>")
   endif()
 endif()
+
+if(LINUX)
+  set_target_properties(SteamHelper PROPERTIES
+    BUILD_WITH_INSTALL_RPATH true
+    INSTALL_RPATH "\$ORIGIN"
+  )
+endif()

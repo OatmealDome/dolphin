@@ -6,8 +6,8 @@
 #include <future>
 #include <unordered_map>
 
-#include "SteamHelperCommon/MessageType.h"
 #include "SteamHelperCommon/IpcConnection.h"
+#include "SteamHelperCommon/MessageType.h"
 
 namespace Steam
 {
@@ -21,14 +21,15 @@ struct IpcResult
 class HelperClient : public IpcConnection
 {
 public:
-  HelperClient(PipeHandle in_handle, PipeHandle out_handle)
-    : IpcConnection(in_handle, out_handle) {}
+  HelperClient(PipeHandle in_handle, PipeHandle out_handle) : IpcConnection(in_handle, out_handle)
+  {
+  }
 
   std::future<IpcResult> SendMessageWithReply(MessageType type, const sf::Packet& payload = {});
   void SendMessageNoReply(MessageType type, const sf::Packet& payload = {});
 
 private:
-  virtual void Receive(sf::Packet &packet) override;
+  virtual void Receive(sf::Packet& packet) override;
 
   virtual void HandleRequestedStop() override;
 

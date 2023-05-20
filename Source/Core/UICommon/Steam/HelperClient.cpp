@@ -5,77 +5,78 @@
 
 namespace Steam
 {
-std::future<IpcResult> HelperClient::SendMessageWithReply(MessageType type, const sf::Packet& payload)
+std::future<IpcResult> HelperClient::SendMessageWithReply(MessageType type,
+                                                          const sf::Packet& payload)
 {
-    auto promise = std::make_shared<std::promise<IpcResult>>();
+  auto promise = std::make_shared<std::promise<IpcResult>>();
 
-    sf::Packet packet;
-    packet << static_cast<uint8_t>(type);
+  sf::Packet packet;
+  packet << static_cast<uint8_t>(type);
 
-    {
-        std::scoped_lock lock(m_promises_mutex);
+  {
+    std::scoped_lock lock(m_promises_mutex);
 
-        packet << ++m_last_call_id;
+    packet << ++m_last_call_id;
 
-        m_promises[m_last_call_id] = promise;
-    }
+    m_promises[m_last_call_id] = promise;
+  }
 
-    packet.append(payload.getData(), payload.getDataSize());
+  packet.append(payload.getData(), payload.getDataSize());
 
-    Send(packet);
+  Send(packet);
 
-    return promise->get_future();
+  return promise->get_future();
 }
 
 void HelperClient::SendMessageNoReply(MessageType type, const sf::Packet& payload)
 {
-    sf::Packet packet;
-    packet << static_cast<uint8_t>(type);
-    packet << std::numeric_limits<uint32_t>::max(); // dummy call ID
+  sf::Packet packet;
+  packet << static_cast<uint8_t>(type);
+  packet << std::numeric_limits<uint32_t>::max();  // dummy call ID
 
-    packet.append(payload.getData(), payload.getDataSize());
+  packet.append(payload.getData(), payload.getDataSize());
 
-    Send(packet);
+  Send(packet);
 }
 
 void HelperClient::Receive(sf::Packet& packet)
 {
-    uint8_t raw_type;
-    packet >> raw_type;
+  uint8_t raw_type;
+  packet >> raw_type;
 
-    MessageType type = static_cast<MessageType>(raw_type);
+  MessageType type = static_cast<MessageType>(raw_type);
 
-    uint32_t call_id;
-    packet >> call_id;
+  uint32_t call_id;
+  packet >> call_id;
 
-    switch (type)
-    {
-        case MessageType::InitReply:
-        case MessageType::FetchUsernameReply:
-        case MessageType::SetRichPresenceReply:
-            {
-                std::scoped_lock lock(m_promises_mutex);
+  switch (type)
+  {
+  case MessageType::InitReply:
+  case MessageType::FetchUsernameReply:
+  case MessageType::SetRichPresenceReply:
+  {
+    std::scoped_lock lock(m_promises_mutex);
 
-                m_promises[call_id].get()->set_value({true, packet});
-                m_promises.erase(call_id);
-            }
+    m_promises[call_id].get()->set_value({true, packet});
+    m_promises.erase(call_id);
+  }
 
-            break;
-        default:
-            fprintf(stderr, "invalid\n");
-            break;
-    }
+  break;
+  default:
+    RequestStop();
+    break;
+  }
 }
 
 void HelperClient::HandleRequestedStop()
 {
-    std::scoped_lock lock(m_promises_mutex);
+  std::scoped_lock lock(m_promises_mutex);
 
-    for (auto iter = m_promises.begin(); iter != m_promises.end(); ++iter)
-    {
-      iter->second.get()->set_value({false, {}});
-    }
+  for (auto iter = m_promises.begin(); iter != m_promises.end(); ++iter)
+  {
+    iter->second.get()->set_value({false, {}});
+  }
 
-    m_promises.clear();
+  m_promises.clear();
 }
 }  // namespace Steam

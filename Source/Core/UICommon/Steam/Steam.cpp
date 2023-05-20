@@ -4,18 +4,18 @@
 #include "UICommon/Steam/HelperClient.h"
 
 #ifndef _WIN32
-#include <unistd.h>
 #include <cstdio>
+#include <unistd.h>
 #endif
 
 #include <utility>
 
 #include "Common/Assert.h"
-#include "Common/MsgHandler.h"
-#include "Common/StringUtil.h"
 #include "Common/CommonFuncs.h"
 #include "Common/CommonPaths.h"
 #include "Common/FileUtil.h"
+#include "Common/MsgHandler.h"
+#include "Common/StringUtil.h"
 
 #include "Core/ConfigManager.h"
 
@@ -41,16 +41,18 @@ InitResult Init()
   const std::string path(File::GetExeDirectory() + DIR_SEP + "SteamHelper.exe");
   const auto wpath = UTF8ToWString(path);
 
-  const std::wstring cmdline = L"\"" + wpath + L"\" " + Common::UTF8ToWString(std::string(STEAM_HELPER_SECRET_STRING));
+  const std::string cmdline("\"" + path + "\" " + STEAM_HELPER_SECRET_STRING);
+  auto wcmdline = UTF8ToWString(cmdline);
 
   STARTUPINFO sinfo{.cb = sizeof(sinfo)};
   sinfo.hStdInput = cts_read;
   sinfo.hStdOutput = stc_write;
-  sinfo.dwFlags = STARTF_USESTDHANDLES | STARTF_FORCEOFFFEEDBACK;
+  sinfo.wShowWindow = SW_HIDE;
+  sinfo.dwFlags = STARTF_USESTDHANDLES | STARTF_USESHOWWINDOW | STARTF_FORCEOFFFEEDBACK;
 
   PROCESS_INFORMATION pinfo;
 
-  if (!CreateProcessW(wpath.c_str(), cmdline.data(), nullptr, nullptr, TRUE, 0, nullptr, nullptr,
+  if (!CreateProcessW(wpath.c_str(), wcmdline.data(), nullptr, nullptr, TRUE, 0, nullptr, nullptr,
                       &sinfo, &pinfo))
   {
     std::string lastError = Common::GetLastErrorString();
@@ -63,7 +65,7 @@ InitResult Init()
   CloseHandle(pinfo.hProcess);
 
   s_client = std::make_unique<HelperClient>(stc_read, cts_write);
-#else // Unix or Unix-like
+#else  // Unix or Unix-like
   int client_to_server[2];
   int server_to_client[2];
 
@@ -159,9 +161,9 @@ void SetRichPresence(const std::string& key, const std::string& value)
 
 void UpdateRichPresence()
 {
-    const std::string& title = SConfig::GetInstance().GetTitleDescription();
+  const std::string& title = SConfig::GetInstance().GetTitleDescription();
 
-    SetRichPresence("steam_display", "#Status_Playing");
-    SetRichPresence("CurrentGame", title);
+  SetRichPresence("steam_display", "#Status_Playing");
+  SetRichPresence("CurrentGame", title);
 }
 }  // namespace Steam

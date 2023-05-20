@@ -27,4 +27,4 @@ int PipeEnd::WriteImpl(const void* buffer, size_t size)
 
   return result ? bytes_written : -1;
 }
-}
+}  // namespace Steam

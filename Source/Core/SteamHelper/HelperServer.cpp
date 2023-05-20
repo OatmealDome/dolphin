@@ -11,102 +11,102 @@
 
 namespace Steam
 {
-void HelperServer::Receive(sf::Packet &packet)
+void HelperServer::Receive(sf::Packet& packet)
 {
-    uint8_t rawType;
-    packet >> rawType;
+  uint8_t rawType;
+  packet >> rawType;
 
-    MessageType type = static_cast<MessageType>(rawType);
+  MessageType type = static_cast<MessageType>(rawType);
 
-    uint32_t call_id;
-    packet >> call_id;
+  uint32_t call_id;
+  packet >> call_id;
 
-    fprintf(stderr, "server received message %hhu\n", type);
+  switch (type)
+  {
+  case MessageType::InitRequest:
+    ReceiveInitRequest(call_id);
+    break;
+  case MessageType::FetchUsernameRequest:
+    ReceiveFetchUsernameRequest(call_id);
+    break;
+  case MessageType::SetRichPresenceRequest:
+  {
+    std::string rp_key;
+    packet >> rp_key;
 
-    switch (type)
-    {
-        case MessageType::InitRequest:
-            ReceiveInitRequest(call_id);
-            break;
-        case MessageType::FetchUsernameRequest:
-            ReceiveFetchUsernameRequest(call_id);
-            break;
-        case MessageType::SetRichPresenceRequest:
-        {
-            std::string rp_key;
-            packet >> rp_key;
+    std::string rp_value;
+    packet >> rp_value;
 
-            std::string rp_value;
-            packet >> rp_value;
+    ReceiveSetRichPresenceRequest(call_id, rp_key, rp_value);
 
-            ReceiveSetRichPresenceRequest(call_id, rp_key, rp_value);
-
-            break;
-        }
-        case MessageType::ShutdownRequest:
-            RequestStop();
-            break;
-        default:
-            fprintf(stderr, "server unknown message\n");
-            break;
-    }
+    break;
+  }
+  case MessageType::ShutdownRequest:
+    RequestStop();
+    break;
+  default:
+    RequestStop();
+    break;
+  }
 }
 
 void HelperServer::ReceiveInitRequest(uint32_t call_id)
 {
-    sf::Packet replyPacket;
+  sf::Packet replyPacket;
 
-    replyPacket << static_cast<uint8_t>(MessageType::InitReply);
-    replyPacket << call_id;
+  replyPacket << static_cast<uint8_t>(MessageType::InitReply);
+  replyPacket << call_id;
 
-    if (SteamAPI_RestartAppIfNecessary(STEAM_APP_ID))
-    {
-        replyPacket << static_cast<uint8_t>(InitResult::RestartingFromSteam);
-    }
-    else if (!SteamAPI_Init())
-    {
-        replyPacket << static_cast<uint8_t>(InitResult::Failure);
-    }
-    else
-    {
-        replyPacket << static_cast<uint8_t>(InitResult::Success);
-    }
-    
-    Send(replyPacket);
+  if (SteamAPI_RestartAppIfNecessary(STEAM_APP_ID))
+  {
+    replyPacket << static_cast<uint8_t>(InitResult::RestartingFromSteam);
+  }
+  else if (!SteamAPI_Init())
+  {
+    replyPacket << static_cast<uint8_t>(InitResult::Failure);
+  }
+  else
+  {
+    replyPacket << static_cast<uint8_t>(InitResult::Success);
+
+    m_steam_inited = true;
+  }
+
+  Send(replyPacket);
 }
 
 void HelperServer::ReceiveFetchUsernameRequest(uint32_t call_id)
 {
-    sf::Packet replyPacket;
+  sf::Packet replyPacket;
 
-    replyPacket << static_cast<uint8_t>(MessageType::FetchUsernameReply);
-    replyPacket << call_id;
+  replyPacket << static_cast<uint8_t>(MessageType::FetchUsernameReply);
+  replyPacket << call_id;
 
-    const char* persona_name = SteamFriends()->GetPersonaName();
-    const std::string persona_name_str = persona_name;
+  const char* persona_name = SteamFriends()->GetPersonaName();
+  const std::string persona_name_str = persona_name;
 
-    replyPacket << persona_name_str;
+  replyPacket << persona_name_str;
 
-    Send(replyPacket);
+  Send(replyPacket);
 }
 
-void HelperServer::ReceiveSetRichPresenceRequest(uint32_t call_id, const std::string& key, const std::string& value)
+void HelperServer::ReceiveSetRichPresenceRequest(uint32_t call_id, const std::string& key,
+                                                 const std::string& value)
 {
-    sf::Packet replyPacket;
+  sf::Packet replyPacket;
 
-    replyPacket << static_cast<uint8_t>(MessageType::SetRichPresenceReply);
-    replyPacket << call_id;
+  replyPacket << static_cast<uint8_t>(MessageType::SetRichPresenceReply);
+  replyPacket << call_id;
 
-    bool result = SteamFriends()->SetRichPresence(key.c_str(), value.c_str());
+  bool result = SteamFriends()->SetRichPresence(key.c_str(), value.c_str());
 
+  replyPacket << static_cast<uint8_t>(result);
 
-    replyPacket << static_cast<uint8_t>(result);
-
-    Send(replyPacket);
+  Send(replyPacket);
 }
 
 void HelperServer::ReceiveShutdownRequest()
 {
-    RequestStop();
+  RequestStop();
 }
 }  // namespace Steam

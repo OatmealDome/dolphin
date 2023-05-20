@@ -10,7 +10,7 @@
 namespace Steam
 {
 IpcConnection::IpcConnection(PipeHandle in_handle, PipeHandle out_handle)
-  : m_in_end(PipeEnd(in_handle)), m_out_end(PipeEnd(out_handle))
+    : m_in_end(PipeEnd(in_handle)), m_out_end(PipeEnd(out_handle))
 {
   m_is_running.store(true);
 
@@ -73,7 +73,7 @@ void IpcConnection::ReceiveThreadFunc()
     uint16_t size;
 
     int result = m_in_end.Read(&size, sizeof(uint16_t));
-    if (result <= 0) // EOF or error
+    if (result <= 0)  // EOF or error
     {
       break;
     }
@@ -95,4 +95,4 @@ void IpcConnection::ReceiveThreadFunc()
 
   RequestStop();
 }
-};
+};  // namespace Steam

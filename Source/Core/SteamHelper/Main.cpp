@@ -23,8 +23,6 @@
 
 int main(int argc, char* argv[])
 {
-  fprintf(stderr, "Hello, world!\n");
-
   auto parser = std::make_unique<optparse::OptionParser>();
   parser->usage("usage: %prog <secret>");
   parser->parse_args(argc, argv);
@@ -64,9 +62,12 @@ int main(int argc, char* argv[])
 
   while (server.IsRunning())
   {
-    SteamAPI_RunCallbacks();
+    if (server.GetSteamInited())
+    {
+      SteamAPI_RunCallbacks();
+    }
 
-    std::this_thread::sleep_for(std::chrono::milliseconds(100)); // run at 10 Hz
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));  // run at 10 Hz
   }
 
   SteamAPI_Shutdown();

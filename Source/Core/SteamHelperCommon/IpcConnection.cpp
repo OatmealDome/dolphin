@@ -5,7 +5,7 @@
 
 #include <cassert>
 
-#define MAX_PACKET_SIZE 0x100
+#define MAX_PACKET_SIZE 8192
 
 namespace Steam
 {
@@ -48,11 +48,10 @@ void IpcConnection::Send(sf::Packet& packet)
     return;
   }
 
-  const size_t total_size = sizeof(std::size_t) + packet.getDataSize();
-  assert(total_size <= MAX_PACKET_SIZE);
+  assert(packet.getDataSize() <= MAX_PACKET_SIZE);
 
-  std::size_t size = packet.getDataSize();
-  if (m_out_end.Write(&size, sizeof(std::size_t)) < 0)
+  uint16_t size = static_cast<uint16_t>(packet.getDataSize());
+  if (m_out_end.Write(&size, sizeof(uint16_t)) < 0)
   {
     RequestStop();
     return;
@@ -71,9 +70,9 @@ void IpcConnection::ReceiveThreadFunc()
   {
     sf::Packet packet;
 
-    std::size_t size;
+    uint16_t size;
 
-    int result = m_in_end.Read(&size, sizeof(std::size_t));
+    int result = m_in_end.Read(&size, sizeof(uint16_t));
     if (result <= 0) // EOF or error
     {
       break;
@@ -81,7 +80,7 @@ void IpcConnection::ReceiveThreadFunc()
 
     uint8_t buffer[MAX_PACKET_SIZE];
 
-    result = m_in_end.Read(&buffer, size);
+    result = m_in_end.Read(&buffer, static_cast<size_t>(size));
     if (result <= 0)
     {
       break;

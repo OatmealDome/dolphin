@@ -98,6 +98,11 @@ bool Init()
   }
 #endif
 
+  if (!s_client->IsRunning())
+  {
+    return false;
+  }
+
   auto result = s_client->SendMessageWithReply(MessageType::InitRequest).get();
 
   if (!result.ipcSuccess)
@@ -105,41 +110,54 @@ bool Init()
     return false;
   }
 
-  uint8_t api_init_result;
+  bool api_init_result;
   result.payload >> api_init_result;
 
-  return static_cast<bool>(api_init_result);
+  return api_init_result;
 }
 
 void Shutdown()
 {
+  if (s_client->IsRunning())
+  {
     s_client->SendMessageNoReply(MessageType::ShutdownRequest);
+  }
 
-    s_client = nullptr;
+  s_client = nullptr;
 }
 
 void FetchUsername()
 {
-    auto result = s_client->SendMessageWithReply(MessageType::FetchUsernameRequest).get();
+  if (!s_client->IsRunning())
+  {
+    return;
+  }
 
-    if (!result.ipcSuccess)
-    {
-      return;
-    }
+  auto result = s_client->SendMessageWithReply(MessageType::FetchUsernameRequest).get();
 
-    std::string username;
-    result.payload >> username;
+  if (!result.ipcSuccess)
+  {
+    return;
+  }
 
-    PanicAlertFmt("username: {}", username);
+  std::string username;
+  result.payload >> username;
+
+  PanicAlertFmt("username: {}", username);
 }
 
 void SetRichPresence(const std::string& key, const std::string& value)
 {
-    sf::Packet payload;
-    payload << key;
-    payload << value;
+  if (!s_client->IsRunning())
+  {
+    return;
+  }
 
-    s_client->SendMessageWithReply(MessageType::SetRichPresenceRequest, payload).get();
+  sf::Packet payload;
+  payload << key;
+  payload << value;
+
+  s_client->SendMessageWithReply(MessageType::SetRichPresenceRequest, payload).get();
 }
 
 void UpdateRichPresence()

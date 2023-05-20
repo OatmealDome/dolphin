@@ -16,7 +16,7 @@ struct IpcResult
   sf::Packet payload;
 };
 
-class HelperClient : IpcConnection
+class HelperClient : public IpcConnection
 {
 public:
   HelperClient(PipeHandle in_handle, PipeHandle out_handle)

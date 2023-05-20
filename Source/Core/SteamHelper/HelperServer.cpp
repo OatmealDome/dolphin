@@ -54,7 +54,7 @@ void HelperServer::ReceiveInitRequest(uint32_t call_id)
     replyPacket << static_cast<uint8_t>(MessageType::InitReply);
     replyPacket << call_id;
 
-    replyPacket << static_cast<uint8_t>(SteamAPI_Init());
+    replyPacket << SteamAPI_Init();
     
     Send(replyPacket);
 }

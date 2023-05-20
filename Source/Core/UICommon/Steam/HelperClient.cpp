@@ -27,6 +27,20 @@ std::future<sf::Packet> HelperClient::SendRequest(const sf::Packet* data_packet,
     return promise->get_future();
 }
 
+void HelperClient::SendRequestNoReply(MessageType type, const sf::Packet* data_packet)
+{
+    sf::Packet packet;
+    packet << static_cast<uint8_t>(type);
+    packet << std::numeric_limits<uint32_t>::max(); // dummy call ID
+
+    if (data_packet != nullptr)
+    {
+        packet.append(data_packet->getData(), data_packet->getDataSize());
+    }
+
+    Send(packet);
+}
+
 void HelperClient::Receive(sf::Packet& packet)
 {
     uint8_t raw_type;
@@ -39,7 +53,6 @@ void HelperClient::Receive(sf::Packet& packet)
 
     switch (message_type)
     {
-        case MessageType::TestReply:
         case MessageType::InitReply:
         case MessageType::FetchUsernameReply:
         case MessageType::SetRichPresenceReply:

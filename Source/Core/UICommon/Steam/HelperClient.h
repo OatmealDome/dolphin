@@ -16,6 +16,7 @@ public:
     : IpcConnection(in_handle, out_handle) {}
 
   std::future<sf::Packet> SendRequest(const sf::Packet* data_packet, MessageType message_type);
+  void SendRequestNoReply(MessageType type, const sf::Packet* data_packet);
 
 private:
   virtual void Receive(sf::Packet &packet) override;

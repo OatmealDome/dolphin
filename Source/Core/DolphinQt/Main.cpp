@@ -310,6 +310,9 @@ int main(int argc, char* argv[])
 
   Core::Shutdown();
   UICommon::Shutdown();
+//#ifdef STEAM
+  Steam::Shutdown();
+//#endif
   Host::GetInstance()->deleteLater();
 
   return retval;

@@ -31,6 +31,7 @@ public:
 private:
   PipeHandle m_handle;
 
+  std::mutex m_mutex;
   bool m_is_open = true;
 };
 }  // namespace Steam

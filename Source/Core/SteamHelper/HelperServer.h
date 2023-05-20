@@ -13,9 +13,9 @@ public:
 private:
   virtual void Receive(sf::Packet &packet) override;
 
-  void ReceiveTestRequest(uint32_t call_id);
   void ReceiveInitRequest(uint32_t call_id);
   void ReceiveFetchUsernameRequest(uint32_t call_id);
   void ReceiveSetRichPresenceRequest(uint32_t call_id, const std::string& key, const std::string& value);
+  void ReceiveShutdownRequest();
 };
 } // namespace Steam

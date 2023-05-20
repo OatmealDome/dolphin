@@ -524,7 +524,7 @@
     <ClInclude Include="InputCommon\KeyboardStatus.h" />
     <ClInclude Include="SteamHelperCommon\IpcConnection.h" />
     <ClInclude Include="SteamHelperCommon\MessageType.h" />
-    <ClInclude Include="SteamHelperCommon\Pipe.h" />
+    <ClInclude Include="SteamHelperCommon\PipeEnd.h" />
     <ClInclude Include="UICommon\AutoUpdate.h" />
     <ClInclude Include="UICommon\CommandLineParse.h" />
     <ClInclude Include="UICommon\Disassembler.h" />

@@ -129,6 +129,8 @@ bool Init()
 
 void Shutdown()
 {
+    s_client->SendRequestNoReply(MessageType::ShutdownRequest, nullptr);
+
     s_client = nullptr;
 }
 

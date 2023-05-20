@@ -20,9 +20,6 @@ void HelperServer::Receive(sf::Packet &packet)
 
     switch (type)
     {
-        case MessageType::TestRequest:
-            ReceiveTestRequest(call_id);
-            break;
         case MessageType::InitRequest:
             ReceiveInitRequest(call_id);
             break;
@@ -41,21 +38,13 @@ void HelperServer::Receive(sf::Packet &packet)
 
             break;
         }
+        case MessageType::ShutdownRequest:
+            RequestStop();
+            break;
         default:
             fprintf(stderr, "server unknown message\n");
             break;
     }
-}
-
-void HelperServer::ReceiveTestRequest(uint32_t call_id)
-{
-    sf::Packet replyPacket;
-
-    replyPacket << static_cast<uint8_t>(MessageType::TestReply);
-    replyPacket << call_id;
-    replyPacket << "testing data";
-
-    Send(replyPacket);
 }
 
 void HelperServer::ReceiveInitRequest(uint32_t call_id)
@@ -98,5 +87,12 @@ void HelperServer::ReceiveSetRichPresenceRequest(uint32_t call_id, const std::st
     replyPacket << static_cast<uint8_t>(result);
 
     Send(replyPacket);
+}
+
+void HelperServer::ReceiveShutdownRequest()
+{
+    SteamAPI_Shutdown();
+
+    RequestStop();
 }
 } // namespace Steam

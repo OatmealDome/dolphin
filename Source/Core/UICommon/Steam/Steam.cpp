@@ -74,6 +74,12 @@ InitResult Init()
 
   pid_t child_pid = fork();
 
+  if (child_pid == -1)
+  {
+    PanicAlertFmt("helper init: fork fail");
+    return InitResult::Failure;
+  }
+
   ASSERT(child_pid != -1);
 
   if (child_pid == 0)  // child
@@ -99,6 +105,7 @@ InitResult Init()
 
   if (!s_client->IsRunning())
   {
+    PanicAlertFmt("helper init: client not running");
     return InitResult::Failure;
   }
 
@@ -106,6 +113,7 @@ InitResult Init()
 
   if (!result.ipcSuccess)
   {
+    PanicAlertFmt("helper init: ipc request fail");
     return InitResult::Failure;
   }
 

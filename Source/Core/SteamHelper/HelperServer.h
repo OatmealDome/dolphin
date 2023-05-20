@@ -21,4 +21,4 @@ private:
   void ReceiveSetRichPresenceRequest(uint32_t call_id, const std::string& key, const std::string& value);
   void ReceiveShutdownRequest();
 };
-} // namespace Steam
+}  // namespace Steam

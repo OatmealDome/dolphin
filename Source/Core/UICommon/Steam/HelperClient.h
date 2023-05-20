@@ -36,4 +36,4 @@ private:
   std::mutex m_promises_mutex;
   uint32_t m_last_call_id = 0;
 };
-} // namespace Steam
+}  // namespace Steam

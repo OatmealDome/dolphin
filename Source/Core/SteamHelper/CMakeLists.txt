@@ -27,6 +27,11 @@ if(APPLE)
     XCODE_ATTRIBUTE_OTHER_CODE_SIGN_FLAGS "--deep --options=runtime"
   )
 
+  target_link_libraries(SteamHelper
+  PRIVATE
+    ${COREFOUNDATION_LIBRARY}
+  )
+
   if(MACOS_CODE_SIGNING)
     # Code sign make file builds
     add_custom_command(TARGET SteamHelper POST_BUILD

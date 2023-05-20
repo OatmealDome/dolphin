@@ -96,4 +96,4 @@ void HelperServer::ReceiveShutdownRequest()
 {
     RequestStop();
 }
-} // namespace Steam
+}  // namespace Steam

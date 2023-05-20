@@ -78,4 +78,4 @@ void HelperClient::HandleRequestedStop()
 
     m_promises.clear();
 }
-} // namespace Steam
+}  // namespace Steam

@@ -66,24 +66,12 @@ bool Init()
   int client_to_server[2];
   int server_to_client[2];
 
-  if (pipe(client_to_server) == -1)
-  {
-    return false;
-  }
-
-  if (pipe(server_to_client) == -1)
-  {
-    fprintf(stderr, "error: stc pipe failure\n");
-    return false;
-  }
+  ASSERT(pipe(client_to_server) == 0);
+  ASSERT(pipe(server_to_client) == 0);
 
   pid_t child_pid = fork();
 
-  if (child_pid == -1)
-  {
-    fprintf(stderr, "error: fork() failed\n");
-    return false;
-  }
+  ASSERT(child_pid != -1);
 
   if (child_pid == 0)  // child
   {
@@ -175,4 +163,4 @@ void UpdateRichPresence()
     SetRichPresence("steam_display", "#Status_Playing");
     SetRichPresence("CurrentGame", title);
 }
-} // namespace Steam
+}  // namespace Steam

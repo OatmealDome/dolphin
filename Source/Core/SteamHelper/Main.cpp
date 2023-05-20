@@ -13,6 +13,10 @@
 #include <unistd.h>
 #endif
 
+#ifdef __APPLE__
+#include <CoreFoundation/CoreFoundation.h>
+#endif
+
 #include "SteamHelperCommon/Constants.h"
 
 #include "SteamHelper/HelperServer.h"
@@ -34,9 +38,15 @@ int main(int argc, char* argv[])
         nullptr,
         L"This application is not meant to be launched directly. Run Dolphin from Steam instead.",
         L"Error", MB_ICONERROR);
+#elif defined(__APPLE__)
+    CFUserNotificationDisplayAlert(0, kCFUserNotificationStopAlertLevel, nullptr, nullptr, nullptr,
+                                   CFSTR("Error"),
+                                   CFSTR("This application is not meant to be launched directly. "
+                                         "Run Dolphin from Steam instead."),
+                                   nullptr, nullptr, nullptr, nullptr);
 #else
-    // TODO
-    fprintf(stderr, "fatal\n");
+    fprintf(stderr, "error: This application is not meant to be launched directly. Run Dolphin "
+                    "from Steam instead.\n");
 #endif
 
     return 1;

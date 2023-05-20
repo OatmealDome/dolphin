@@ -9,6 +9,7 @@ PRIVATE
   cpp-optparse
   SteamHelperCommon
   SteamworksSDK::SteamworksSDK
+  Threads::Threads
 )
 
 add_custom_command(TARGET SteamHelper POST_BUILD

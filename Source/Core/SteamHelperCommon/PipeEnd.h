@@ -5,8 +5,10 @@
 #ifdef _WIN32
 #include <Windows.h>
 typedef HANDLE PipeHandle;
+#define INVALID_PIPE_HANDLE INVALID_HANDLE_VALUE
 #else
 typedef int PipeHandle;
+#define INVALID_PIPE_HANDLE -1
 #endif
 
 namespace Steam
@@ -29,7 +31,6 @@ public:
 private:
   PipeHandle m_handle;
 
-  std::mutex m_mutex;
   bool m_is_open = true;
 };
 }  // namespace Steam

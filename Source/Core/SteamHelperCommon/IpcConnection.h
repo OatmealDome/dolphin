@@ -5,7 +5,6 @@
 
 #include <atomic>
 #include <mutex>
-#include <queue>
 #include <thread>
 
 #include <SFML/Network/Packet.hpp>
@@ -21,24 +20,21 @@ public:
   virtual ~IpcConnection();
 
   bool IsRunning();
+  void RequestStop();
 
 protected:
   void Send(sf::Packet& packet);
   virtual void Receive(sf::Packet& packet) = 0;
 
 private:
-  void ReceiveFunc();
+  void ReceiveThreadFunc();
 
-  void RequestStop();
-
-  PipeEnd m_incoming_pipe;
-  PipeEnd m_outgoing_pipe;
-
-  std::mutex m_send_mutex;
-
-  std::thread m_receive_thread;
-  std::atomic_bool m_stop_receiving;
+  PipeEnd m_in_end;
+  PipeEnd m_out_end;
+  std::mutex m_out_mutex;
 
   std::atomic_bool m_is_running;
+
+  std::thread m_receive_thread;
 };
 }  // namespace Steam

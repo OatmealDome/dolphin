@@ -1,4 +1,7 @@
-#include "HelperServer.h"
+// Copyright 2023 Dolphin Emulator Project
+// SPDX-License-Identifier: BSD-3-Clause
+
+#include "SteamHelper/HelperServer.h"
 
 #include <steam/steam_api.h>
 

@@ -1,5 +1,9 @@
-#include <OptionParser.h>
+// Copyright 2023 Dolphin Emulator Project
+// SPDX-License-Identifier: BSD-3-Clause
+
 #include <thread>
+
+#include <OptionParser.h>
 
 #include <steam/steam_api.h>
 
@@ -22,11 +26,6 @@ int main(int argc, char* argv[])
   parser->parse_args(argc, argv);
 
   auto args = parser->args();
-
-  for (int i = 0; i < args.size(); i++)
-  {
-    fprintf(stderr, "arg %d: %s\n", i, args[0].c_str());
-  }
 
   if (args.size() != 1 || args[0] != STEAM_HELPER_SECRET_STRING)
   {

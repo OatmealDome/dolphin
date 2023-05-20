@@ -1,8 +1,10 @@
+// Copyright 2023 Dolphin Emulator Project
+// SPDX-License-Identifier: BSD-3-Clause
+
 #pragma once
 
-
-#include <unordered_map>
 #include <future>
+#include <unordered_map>
 
 #include "SteamHelperCommon/MessageType.h"
 #include "SteamHelperCommon/IpcConnection.h"

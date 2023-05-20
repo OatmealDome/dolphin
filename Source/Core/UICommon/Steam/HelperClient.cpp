@@ -2,12 +2,12 @@
 
 namespace Steam
 {
-std::future<sf::Packet> HelperClient::SendRequest(const sf::Packet* data_packet, MessageType message_type)
+std::future<IpcResult> HelperClient::SendMessageWithReply(MessageType type, const sf::Packet& payload)
 {
-    auto promise = std::make_shared<std::promise<sf::Packet>>();
+    auto promise = std::make_shared<std::promise<IpcResult>>();
 
     sf::Packet packet;
-    packet << (uint8_t)message_type;
+    packet << static_cast<uint8_t>(type);
 
     {
         std::scoped_lock lock(m_promises_mutex);
@@ -17,26 +17,20 @@ std::future<sf::Packet> HelperClient::SendRequest(const sf::Packet* data_packet,
         m_promises[m_last_call_id] = promise;
     }
 
-    if (data_packet != nullptr)
-    {
-        packet.append(data_packet->getData(), data_packet->getDataSize());
-    }
+    packet.append(payload.getData(), payload.getDataSize());
 
     Send(packet);
 
     return promise->get_future();
 }
 
-void HelperClient::SendRequestNoReply(MessageType type, const sf::Packet* data_packet)
+void HelperClient::SendMessageNoReply(MessageType type, const sf::Packet& payload)
 {
     sf::Packet packet;
     packet << static_cast<uint8_t>(type);
     packet << std::numeric_limits<uint32_t>::max(); // dummy call ID
 
-    if (data_packet != nullptr)
-    {
-        packet.append(data_packet->getData(), data_packet->getDataSize());
-    }
+    packet.append(payload.getData(), payload.getDataSize());
 
     Send(packet);
 }
@@ -46,12 +40,12 @@ void HelperClient::Receive(sf::Packet& packet)
     uint8_t raw_type;
     packet >> raw_type;
 
-    MessageType message_type = (MessageType)raw_type;
+    MessageType type = static_cast<MessageType>(raw_type);
 
     uint32_t call_id;
     packet >> call_id;
 
-    switch (message_type)
+    switch (type)
     {
         case MessageType::InitReply:
         case MessageType::FetchUsernameReply:
@@ -59,7 +53,7 @@ void HelperClient::Receive(sf::Packet& packet)
             {
                 std::scoped_lock lock(m_promises_mutex);
 
-                m_promises[call_id].get()->set_value(packet);
+                m_promises[call_id].get()->set_value({true, packet});
                 m_promises.erase(call_id);
             }
 
@@ -68,5 +62,17 @@ void HelperClient::Receive(sf::Packet& packet)
             fprintf(stderr, "invalid\n");
             break;
     }
+}
+
+void HelperClient::HandleRequestedStop()
+{
+    std::scoped_lock lock(m_promises_mutex);
+
+    for (auto iter = m_promises.begin(); iter != m_promises.end(); ++iter)
+    {
+      iter->second.get()->set_value({false, {}});
+    }
+
+    m_promises.clear();
 }
 } // namespace Steam

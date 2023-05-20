@@ -91,8 +91,6 @@ void HelperServer::ReceiveSetRichPresenceRequest(uint32_t call_id, const std::st
 
 void HelperServer::ReceiveShutdownRequest()
 {
-    SteamAPI_Shutdown();
-
     RequestStop();
 }
 } // namespace Steam

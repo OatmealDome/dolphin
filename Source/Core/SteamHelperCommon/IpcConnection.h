@@ -19,12 +19,14 @@ public:
   IpcConnection(PipeHandle in_handle, PipeHandle out_handle);
   virtual ~IpcConnection();
 
-  bool IsRunning();
+  bool IsRunning() const;
   void RequestStop();
 
 protected:
   void Send(sf::Packet& packet);
   virtual void Receive(sf::Packet& packet) = 0;
+
+  virtual void HandleRequestedStop() {}
 
 private:
   void ReceiveThreadFunc();

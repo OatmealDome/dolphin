@@ -19,10 +19,9 @@ namespace Steam
 {
 static std::unique_ptr<HelperClient> s_client;
 
-#ifdef _WIN32
-
 bool Init()
 {
+#ifdef _WIN32
   HANDLE cts_read, cts_write;
   HANDLE stc_read, stc_write;
 
@@ -32,22 +31,22 @@ bool Init()
   ASSERT(SetHandleInformation(cts_read, HANDLE_FLAG_INHERIT, HANDLE_FLAG_INHERIT));
   ASSERT(SetHandleInformation(stc_write, HANDLE_FLAG_INHERIT, HANDLE_FLAG_INHERIT));
 
-  std::string path(File::GetExeDirectory() + DIR_SEP);
-  std::string exe_path = path + "SteamHelper.exe";
+  const std::string path(File::GetExeDirectory() + DIR_SEP + "SteamHelper.exe");
+  const auto wpath = UTF8ToWString(path);
 
+  std::wstring cmdline = L"\"" + wpath + L"\" SecretStringFromDolphin";
 
-  const auto wpath = UTF8ToWString(exe_path);
-  std::wstring cmdline = L"\"" + wpath + L"\"";
   STARTUPINFO sinfo{.cb = sizeof(sinfo)};
   sinfo.hStdInput = cts_read;
   sinfo.hStdOutput = stc_write;
-  sinfo.dwFlags = STARTF_USESTDHANDLES | STARTF_FORCEOFFFEEDBACK;  // No hourglass cursor after starting the process.
+  sinfo.dwFlags = STARTF_USESTDHANDLES | STARTF_FORCEOFFFEEDBACK;
+
   PROCESS_INFORMATION pinfo;
-  if (!CreateProcessW(wpath.c_str(), cmdline.data(),
-                     nullptr, nullptr, TRUE, 0, nullptr, nullptr, &sinfo, &pinfo))
+
+  if (!CreateProcessW(wpath.c_str(), cmdline.data(), nullptr, nullptr, TRUE, 0, nullptr, nullptr,
+                      &sinfo, &pinfo))
   {
     std::string lastError = Common::GetLastErrorString();
-    PanicAlertFmt("process create error {}", lastError);
     return false;
   }
 
@@ -56,105 +55,91 @@ bool Init()
   CloseHandle(pinfo.hThread);
   CloseHandle(pinfo.hProcess);
 
-    s_client = std::make_unique<HelperClient>(stc_read, cts_write);
+  s_client = std::make_unique<HelperClient>(stc_read, cts_write);
+#else // Unix or Unix-like
+  int client_to_server[2];
+  int server_to_client[2];
 
-    auto future = s_client->SendRequest(nullptr, MessageType::InitRequest);
-
-    auto packet = future.get();
-
-    uint8_t raw_result;
-    packet >> raw_result;
-
-    return static_cast<bool>(raw_result);
-}
-
-#else
-
-bool Init()
-{
-    int client_to_server[2];
-    int server_to_client[2];
-
-    if (pipe(client_to_server) == -1)
-    {
-        fprintf(stderr, "error: cts pipe failure\n");
-        return false;
-    }
-
-    if (pipe(server_to_client) == -1)
-    {
-        fprintf(stderr, "error: stc pipe failure\n");
-        return false;
-    }
-
-    pid_t child_pid = fork();
-
-    if (child_pid == -1)
-    {
-        fprintf(stderr, "error: fork() failed\n");
-        return false;
-    }
-
-    if (child_pid == 0) // child
-    {
-        close(server_to_client[0]);
-        close(client_to_server[1]);
-
-        std::string incoming_fd_str = std::to_string(client_to_server[0]);
-        std::string outgoing_fd_str = std::to_string(server_to_client[1]);
-
-        execl("SteamHelper", "SteamHelper", incoming_fd_str.c_str(), outgoing_fd_str.c_str(), NULL);
-    }
-    else
-    {
-        close(client_to_server[0]);
-        close(server_to_client[1]);
-
-        s_client = std::make_unique<HelperClient>(server_to_client[0], client_to_server[1]);
-
-        auto future = s_client->SendRequest(nullptr, MessageType::InitRequest);
-
-        auto packet = future.get();
-
-        uint8_t raw_result;
-        packet >> raw_result;
-
-        return static_cast<bool>(raw_result);
-    }
-
+  if (pipe(client_to_server) == -1)
+  {
     return false;
-}
+  }
 
+  if (pipe(server_to_client) == -1)
+  {
+    fprintf(stderr, "error: stc pipe failure\n");
+    return false;
+  }
+
+  pid_t child_pid = fork();
+
+  if (child_pid == -1)
+  {
+    fprintf(stderr, "error: fork() failed\n");
+    return false;
+  }
+
+  if (child_pid == 0)  // child
+  {
+    close(server_to_client[0]);
+    close(client_to_server[1]);
+
+    std::string incoming_fd_str = std::to_string(client_to_server[0]);
+    std::string outgoing_fd_str = std::to_string(server_to_client[1]);
+
+    execl("SteamHelper", "SteamHelper", incoming_fd_str.c_str(), outgoing_fd_str.c_str(), NULL);
+  }
+  else
+  {
+    close(client_to_server[0]);
+    close(server_to_client[1]);
+
+    s_client = std::make_unique<HelperClient>(server_to_client[0], client_to_server[1]);
+  }
 #endif
+
+  auto result = s_client->SendMessageWithReply(MessageType::InitRequest).get();
+
+  if (!result.ipcSuccess)
+  {
+    return false;
+  }
+
+  uint8_t api_init_result;
+  result.payload >> api_init_result;
+
+  return static_cast<bool>(api_init_result);
+}
 
 void Shutdown()
 {
-    s_client->SendRequestNoReply(MessageType::ShutdownRequest, nullptr);
+    s_client->SendMessageNoReply(MessageType::ShutdownRequest);
 
     s_client = nullptr;
 }
 
 void FetchUsername()
 {
-    auto future = s_client->SendRequest(nullptr, MessageType::FetchUsernameRequest);
+    auto result = s_client->SendMessageWithReply(MessageType::FetchUsernameRequest).get();
 
-    auto packet = future.get();
+    if (!result.ipcSuccess)
+    {
+      return;
+    }
 
     std::string username;
-    packet >> username;
+    result.payload >> username;
 
     PanicAlertFmt("username: {}", username);
 }
 
 void SetRichPresence(const std::string& key, const std::string& value)
 {
-    sf::Packet packet;
-    packet << key;
-    packet << value;
+    sf::Packet payload;
+    payload << key;
+    payload << value;
 
-    auto future = s_client->SendRequest(&packet, MessageType::SetRichPresenceRequest);
-
-    auto reply_packet = future.get();
+    s_client->SendMessageWithReply(MessageType::SetRichPresenceRequest, payload).get();
 }
 
 void UpdateRichPresence()

@@ -27,7 +27,7 @@ IpcConnection::~IpcConnection()
   m_receive_thread.join();
 }
 
-bool IpcConnection::IsRunning()
+bool IpcConnection::IsRunning() const
 {
   return m_is_running.load();
 }
@@ -35,6 +35,8 @@ bool IpcConnection::IsRunning()
 void IpcConnection::RequestStop()
 {
   m_is_running.store(false);
+
+  HandleRequestedStop();
 }
 
 void IpcConnection::Send(sf::Packet& packet)

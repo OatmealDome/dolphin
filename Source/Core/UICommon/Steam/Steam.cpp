@@ -73,7 +73,7 @@ InitResult Init()
   ASSERT(pipe(client_to_server) == 0);
   ASSERT(pipe(server_to_client) == 0);
 
-  setenv(STEAM_HELPER_ENV_VAR_NAME, "1");
+  setenv(STEAM_HELPER_ENV_VAR_NAME, "1", true);
 
   pid_t child_pid = fork();
 
@@ -95,7 +95,7 @@ InitResult Init()
 
     const std::string path(File::GetExeDirectory() + DIR_SEP + "dolphin-steam-helper");
 
-    execl(path.c_str(), "dolphin-steam-helper", STEAM_HELPER_SECRET_STRING, NULL);
+    execl(path.c_str(), "dolphin-steam-helper", nullptr);
   }
   else
   {

@@ -8,12 +8,12 @@ find_path(SteamworksSDK_STEAM_HEADER_DIR steam_api.h
 # have a "steam/" prefix for Steamworks SDK headers.
 set(SteamworksSDK_INCLUDE_DIR "${SteamworksSDK_STEAM_HEADER_DIR}/..")
 
-if(WIN32 AND _ARCH_64)
+if(WIN32 AND _M_X86_64)
   set(SteamworksSDK_LIBRARY_DIR "${SteamworksSDK_DIR}/redistributable_bin/win64")
 elseif(APPLE)
   set(SteamworksSDK_LIBRARY_DIR "${SteamworksSDK_DIR}/redistributable_bin/osx")
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
-  if(_ARCH_64)
+  if(_M_X86_64)
     set(SteamworksSDK_LIBRARY_DIR "${SteamworksSDK_DIR}/redistributable_bin/linux64")
   else()
     set(SteamworksSDK_LIBRARY_DIR "${SteamworksSDK_DIR}/redistributable_bin/linux32")

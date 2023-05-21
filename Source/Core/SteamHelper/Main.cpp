@@ -21,22 +21,21 @@
 
 #include "SteamHelper/HelperServer.h"
 
-int main(int argc, char* argv[])
+int main(int, char*[])
 {
-  auto parser = std::make_unique<optparse::OptionParser>();
-  parser->usage("usage: %prog <secret>");
-  parser->parse_args(argc, argv);
-
-  auto args = parser->args();
-
-  if (args.size() != 1 || args[0] != STEAM_HELPER_SECRET_STRING)
-  {
 #ifdef _WIN32
+  if (!GetEnvironmentVariableA(STEAM_HELPER_ENV_VAR_NAME, nullptr, 0))
+  {
     MessageBoxW(
         nullptr,
         L"This application is not meant to be launched directly. Run Dolphin from Steam instead.",
         L"Error", MB_ICONERROR);
-#elif defined(__APPLE__)
+    return 1;
+  }
+#else
+  if (getenv(STEAM_HELPER_ENV_VAR_NAME) == nullptr)
+  {
+#ifdef __APPLE__
     CFUserNotificationDisplayAlert(0, kCFUserNotificationStopAlertLevel, nullptr, nullptr, nullptr,
                                    CFSTR("Error"),
                                    CFSTR("This application is not meant to be launched directly. "
@@ -49,6 +48,7 @@ int main(int argc, char* argv[])
 
     return 1;
   }
+#endif
 
 #ifdef _WIN32
   PipeHandle in_handle = GetStdHandle(STD_INPUT_HANDLE);

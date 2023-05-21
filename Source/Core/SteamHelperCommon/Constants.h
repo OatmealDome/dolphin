@@ -7,4 +7,4 @@
 static const int STEAM_APP_ID = 1941680;
 
 // Used to verify that the helper app is being launched by Dolphin.
-static const char* STEAM_HELPER_SECRET_STRING = "SecretStringFromDolphin";
+static const char* STEAM_HELPER_ENV_VAR_NAME = "LAUNCHED_BY_DOLPHIN";

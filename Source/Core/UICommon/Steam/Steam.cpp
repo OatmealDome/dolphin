@@ -41,8 +41,9 @@ InitResult Init()
   const std::string path(File::GetExeDirectory() + DIR_SEP + "SteamHelper.exe");
   const auto wpath = UTF8ToWString(path);
 
-  const std::string cmdline("\"" + path + "\" " + STEAM_HELPER_SECRET_STRING);
-  auto wcmdline = UTF8ToWString(cmdline);
+  std::wstring wcmdline(L"\"" + wpath + L"\"");
+
+  SetEnvironmentVariableA(STEAM_HELPER_ENV_VAR_NAME, "1");
 
   STARTUPINFO sinfo{.cb = sizeof(sinfo)};
   sinfo.hStdInput = cts_read;
@@ -71,6 +72,8 @@ InitResult Init()
 
   ASSERT(pipe(client_to_server) == 0);
   ASSERT(pipe(server_to_client) == 0);
+
+  setenv(STEAM_HELPER_ENV_VAR_NAME, "1");
 
   pid_t child_pid = fork();
 

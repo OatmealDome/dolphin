@@ -188,15 +188,17 @@ int main(int argc, char* argv[])
 
 //#ifdef STEAM
   Steam::InitResult steam_init_result = Steam::Init();
-  if (steam_init_result == Steam::InitResult::Failure)
+  if (steam_init_result != Steam::InitResult::Success)
   {
-    PanicAlertFmtT("Failed to initialize Steam helper");
-    return 0;
-  }
-  else if (steam_init_result == Steam::InitResult::RestartingFromSteam)
-  {
-    // We're not being launched by Steam. Exit immediately, as Steam will relaunch Dolphin for us.
-    return 0;
+    Steam::Shutdown();
+
+    // Only show a panic alert if we're not being relaunched by Steam.
+    if (steam_init_result == Steam::InitResult::Failure)
+    {
+      PanicAlertFmtT("Failed to initialize Steam helper");
+    }
+
+    return 1;
   }
 
   Steam::FetchUsername();

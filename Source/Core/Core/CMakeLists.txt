@@ -479,6 +479,13 @@ add_library(core
   PatchEngine.h
   PowerPC/BreakPoints.cpp
   PowerPC/BreakPoints.h
+  PowerPC/BytecodeInterpreter/BytecodeInterpreter_Disassembler.cpp
+  PowerPC/BytecodeInterpreter/BytecodeInterpreter.cpp
+  PowerPC/BytecodeInterpreter/BytecodeInterpreter.h
+  PowerPC/BytecodeInterpreter/BytecodeInterpreterBlockCache.cpp
+  PowerPC/BytecodeInterpreter/BytecodeInterpreterBlockCache.h
+  PowerPC/BytecodeInterpreter/BytecodeInterpreterEmitter.cpp
+  PowerPC/BytecodeInterpreter/BytecodeInterpreterEmitter.h
   PowerPC/CachedInterpreter/CachedInterpreter_Disassembler.cpp
   PowerPC/CachedInterpreter/CachedInterpreter.cpp
   PowerPC/CachedInterpreter/CachedInterpreter.h

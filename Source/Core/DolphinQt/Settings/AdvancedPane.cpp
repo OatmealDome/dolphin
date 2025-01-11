@@ -31,6 +31,7 @@
 static const std::map<PowerPC::CPUCore, const char*> CPU_CORE_NAMES = {
     {PowerPC::CPUCore::Interpreter, QT_TR_NOOP("Interpreter (slowest)")},
     {PowerPC::CPUCore::CachedInterpreter, QT_TR_NOOP("Cached Interpreter (slower)")},
+    {PowerPC::CPUCore::BytecodeInterpreter, QT_TR_NOOP("Bytecode Interpreter (experimental)")},
     {PowerPC::CPUCore::JIT64, QT_TR_NOOP("JIT Recompiler for x86-64 (recommended)")},
     {PowerPC::CPUCore::JITARM64, QT_TR_NOOP("JIT Recompiler for ARM64 (recommended)")},
 };

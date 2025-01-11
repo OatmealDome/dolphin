@@ -38,6 +38,7 @@ enum class CPUCore
   JIT64 = 1,
   JITARM64 = 4,
   CachedInterpreter = 5,
+  BytecodeInterpreter = 6,
 };
 
 enum class CoreMode

@@ -15,6 +15,7 @@
 #include "Common/MsgHandler.h"
 
 #include "Core/Core.h"
+#include "Core/PowerPC/BytecodeInterpreter/BytecodeInterpreter.h"
 #include "Core/PowerPC/CPUCoreBase.h"
 #include "Core/PowerPC/CachedInterpreter/CachedInterpreter.h"
 #include "Core/PowerPC/JitCommon/JitBase.h"
@@ -64,6 +65,9 @@ CPUCoreBase* JitInterface::InitJitCore(PowerPC::CPUCore core)
 #endif
   case PowerPC::CPUCore::CachedInterpreter:
     m_jit = std::make_unique<CachedInterpreter>(m_system);
+    break;
+  case PowerPC::CPUCore::BytecodeInterpreter:
+    m_jit = std::make_unique<BytecodeInterpreter>(m_system);
     break;
 
   default:

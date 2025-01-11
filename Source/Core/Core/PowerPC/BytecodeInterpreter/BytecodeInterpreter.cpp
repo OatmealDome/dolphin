@@ -118,28 +118,24 @@ s32 BytecodeInterpreter::EndBlock(PowerPC::PowerPCState& ppc_state,
   return 0;
 }
 
-template <bool write_pc>
+s32 BytecodeInterpreter::WritePC(PowerPC::PowerPCState& ppc_state,
+                                const WritePCOperands& operands)
+{
+  ppc_state.pc = operands.current_pc;
+  ppc_state.npc = operands.current_pc + 4;
+  return sizeof(AnyCallback) + sizeof(operands);
+}
+
 s32 BytecodeInterpreter::Interpret(PowerPC::PowerPCState& ppc_state,
                                  const InterpretOperands& operands)
 {
-  if constexpr (write_pc)
-  {
-    ppc_state.pc = operands.current_pc;
-    ppc_state.npc = operands.current_pc + 4;
-  }
   operands.func(operands.interpreter, operands.inst);
   return sizeof(AnyCallback) + sizeof(operands);
 }
 
-template <bool write_pc>
 s32 BytecodeInterpreter::InterpretAndCheckExceptions(
     PowerPC::PowerPCState& ppc_state, const InterpretAndCheckExceptionsOperands& operands)
 {
-  if constexpr (write_pc)
-  {
-    ppc_state.pc = operands.current_pc;
-    ppc_state.npc = operands.current_pc + 4;
-  }
   operands.func(operands.interpreter, operands.inst);
 
   if ((ppc_state.Exceptions & (EXCEPTION_DSI | EXCEPTION_PROGRAM)) != 0)
@@ -372,24 +368,25 @@ bool BytecodeInterpreter::DoJit(u32 em_address, JitBlock* b, u32 nextPC)
         js.firstFPInstructionFound = true;
       }
 
+      if (op.canEndBlock)
+        Write(CallbackCast(WritePC), {js.compilerPC});
+
       // Instruction may cause a DSI Exception or Program Exception.
       if ((jo.memcheck && (op.opinfo->flags & FL_LOADSTORE) != 0) ||
           (!op.canEndBlock && ShouldHandleFPExceptionForInstruction(&op)))
       {
         const InterpretAndCheckExceptionsOperands operands = {
-            {interpreter, Interpreter::GetInterpreterOp(op.inst), js.compilerPC, op.inst},
+            {interpreter, Interpreter::GetInterpreterOp(op.inst), op.inst},
             power_pc,
+            js.compilerPC,
             js.downcountAmount};
-        Write(op.canEndBlock ? CallbackCast(InterpretAndCheckExceptions<true>) :
-                               CallbackCast(InterpretAndCheckExceptions<false>),
-              operands);
+        Write(CallbackCast(InterpretAndCheckExceptions), operands);
       }
       else
       {
         const InterpretOperands operands = {interpreter, Interpreter::GetInterpreterOp(op.inst),
-                                            js.compilerPC, op.inst};
-        Write(op.canEndBlock ? CallbackCast(Interpret<true>) : CallbackCast(Interpret<false>),
-              operands);
+                                            op.inst};
+        Write(CallbackCast(Interpret), operands);
       }
 
       if (op.branchIsIdleLoop)

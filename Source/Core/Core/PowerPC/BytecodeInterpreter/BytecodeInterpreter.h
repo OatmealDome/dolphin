@@ -76,6 +76,7 @@ private:
   struct StartProfiledBlockOperands;
   template <bool profiled>
   struct EndBlockOperands;
+  struct WritePCOperands;
   struct InterpretOperands;
   struct InterpretAndCheckExceptionsOperands;
   struct HLEFunctionOperands;
@@ -90,14 +91,12 @@ private:
   static s32 EndBlock(PowerPC::PowerPCState& ppc_state, const EndBlockOperands<profiled>& operands);
   template <bool profiled>
   static s32 EndBlock(std::ostream& stream, const EndBlockOperands<profiled>& operands);
-  template <bool write_pc>
+  static s32 WritePC(PowerPC::PowerPCState& ppc_state, const WritePCOperands& operands);
+  static s32 WritePC(std::ostream& stream, const WritePCOperands& operands);
   static s32 Interpret(PowerPC::PowerPCState& ppc_state, const InterpretOperands& operands);
-  template <bool write_pc>
   static s32 Interpret(std::ostream& stream, const InterpretOperands& operands);
-  template <bool write_pc>
   static s32 InterpretAndCheckExceptions(PowerPC::PowerPCState& ppc_state,
                                          const InterpretAndCheckExceptionsOperands& operands);
-  template <bool write_pc>
   static s32 InterpretAndCheckExceptions(std::ostream& stream,
                                          const InterpretAndCheckExceptionsOperands& operands);
   static s32 HLEFunction(PowerPC::PowerPCState& ppc_state, const HLEFunctionOperands& operands);
@@ -136,17 +135,23 @@ struct BytecodeInterpreter::EndBlockOperands<true> : BytecodeInterpreter::EndBlo
   JitBlock::ProfileData* profile_data;
 };
 
+struct BytecodeInterpreter::WritePCOperands
+{
+  u32 current_pc;
+  u32 : 32;
+};
+
 struct BytecodeInterpreter::InterpretOperands
 {
   Interpreter& interpreter;
   void (*func)(Interpreter&, UGeckoInstruction);  // Interpreter::Instruction
-  u32 current_pc;
   UGeckoInstruction inst;
 };
 
 struct BytecodeInterpreter::InterpretAndCheckExceptionsOperands : InterpretOperands
 {
   PowerPC::PowerPCManager& power_pc;
+  u32 current_pc;
   u32 downcount;
 };
 

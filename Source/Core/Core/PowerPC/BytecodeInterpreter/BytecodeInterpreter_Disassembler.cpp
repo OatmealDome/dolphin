@@ -34,22 +34,26 @@ s32 BytecodeInterpreter::EndBlock(std::ostream& stream, const EndBlockOperands<p
   return sizeof(AnyCallback) + sizeof(operands);
 }
 
-template <bool write_pc>
-s32 BytecodeInterpreter::Interpret(std::ostream& stream, const InterpretOperands& operands)
+s32 BytecodeInterpreter::WritePC(std::ostream& stream,
+                                const WritePCOperands& operands)
 {
-  fmt::println(stream, "Interpret<write_pc={:5}>(current_pc=0x{:08x}, inst=0x{:08x})", write_pc,
-               operands.current_pc, operands.inst.hex);
+  fmt::println(stream, "WritePC(current_pc=0x{:08x})", operands.current_pc);
   return sizeof(AnyCallback) + sizeof(operands);
 }
 
-template <bool write_pc>
+s32 BytecodeInterpreter::Interpret(std::ostream& stream, const InterpretOperands& operands)
+{
+  fmt::println(stream, "Interpret(inst=0x{:08x})", operands.inst.hex);
+  return sizeof(AnyCallback) + sizeof(operands);
+}
+
 s32 BytecodeInterpreter::InterpretAndCheckExceptions(
     std::ostream& stream, const InterpretAndCheckExceptionsOperands& operands)
 {
   fmt::println(stream,
-               "InterpretAndCheckExceptions<write_pc={:5}>(current_pc=0x{:08x}, inst=0x{:08x}, "
+               "InterpretAndCheckExceptions(inst=0x{:08x}, current_pc=0x{:08x}, "
                "downcount={})",
-               write_pc, operands.current_pc, operands.inst.hex, operands.downcount);
+               operands.inst.hex, operands.current_pc,  operands.downcount);
   return sizeof(AnyCallback) + sizeof(operands);
 }
 
@@ -106,10 +110,9 @@ std::size_t BytecodeInterpreter::Disassemble(const JitBlock& block, std::ostream
       LOOKUP_KV(BytecodeInterpreter::StartProfiledBlock),
       LOOKUP_KV(BytecodeInterpreter::EndBlock<false>),
       LOOKUP_KV(BytecodeInterpreter::EndBlock<true>),
-      LOOKUP_KV(BytecodeInterpreter::Interpret<false>),
-      LOOKUP_KV(BytecodeInterpreter::Interpret<true>),
-      LOOKUP_KV(BytecodeInterpreter::InterpretAndCheckExceptions<false>),
-      LOOKUP_KV(BytecodeInterpreter::InterpretAndCheckExceptions<true>),
+      LOOKUP_KV(BytecodeInterpreter::WritePC),
+      LOOKUP_KV(BytecodeInterpreter::Interpret),
+      LOOKUP_KV(BytecodeInterpreter::InterpretAndCheckExceptions),
       LOOKUP_KV(BytecodeInterpreter::HLEFunction),
       LOOKUP_KV(BytecodeInterpreter::WriteBrokenBlockNPC),
       LOOKUP_KV(BytecodeInterpreter::CheckFPU),

@@ -256,6 +256,15 @@ void BytecodeInterpreter::ResetFreeMemoryRanges()
   m_free_ranges.insert(region, region + region_size);
 }
 
+void BytecodeInterpreter::FallBackToInterpreter(UGeckoInstruction inst)
+{
+  auto& interpreter = m_system.GetInterpreter();
+
+  const InterpretOperands operands = {interpreter, Interpreter::GetInterpreterOp(inst),
+                                      inst};
+  Write(CallbackCast(Interpret), operands);
+}
+
 void BytecodeInterpreter::Jit(u32 em_address)
 {
   Jit(em_address, true);
@@ -329,7 +338,6 @@ bool BytecodeInterpreter::DoJit(u32 em_address, JitBlock* b, u32 nextPC)
   js.numFloatingPointInst = 0;
   js.curBlock = b;
 
-  auto& interpreter = m_system.GetInterpreter();
   auto& power_pc = m_system.GetPowerPC();
   auto& cpu = m_system.GetCPU();
   auto& breakpoints = power_pc.GetBreakPoints();
@@ -368,10 +376,8 @@ bool BytecodeInterpreter::DoJit(u32 em_address, JitBlock* b, u32 nextPC)
 
       if (op.canEndBlock)
         Write(CallbackCast(WritePC), {js.compilerPC});
-        
-      const InterpretOperands operands = {interpreter, Interpreter::GetInterpreterOp(op.inst),
-                                          op.inst};
-      Write(CallbackCast(Interpret), operands);
+
+      CompileInstruction(op);
 
       // Instruction may cause a DSI Exception or Program Exception.
       if ((jo.memcheck && (op.opinfo->flags & FL_LOADSTORE) != 0) ||

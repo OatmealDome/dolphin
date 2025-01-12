@@ -58,6 +58,18 @@ public:
   const char* GetName() const override { return "Bytecode Interpreter"; }
   const CommonAsmRoutinesBase* GetAsmRoutines() override { return nullptr; }
 
+  using Instruction = void (BytecodeInterpreter::*)(UGeckoInstruction);
+  void FallBackToInterpreter(UGeckoInstruction inst);
+
+  void DynaRunTable4(UGeckoInstruction inst);
+  void DynaRunTable19(UGeckoInstruction inst);
+  void DynaRunTable31(UGeckoInstruction inst);
+  void DynaRunTable59(UGeckoInstruction inst);
+  void DynaRunTable63(UGeckoInstruction inst);
+
+protected:
+  void CompileInstruction(PPCAnalyst::CodeOp& op);
+
 private:
   void ExecuteOneBlock();
 

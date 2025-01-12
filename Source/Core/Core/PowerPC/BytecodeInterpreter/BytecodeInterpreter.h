@@ -78,7 +78,7 @@ private:
   struct EndBlockOperands;
   struct WritePCOperands;
   struct InterpretOperands;
-  struct InterpretAndCheckExceptionsOperands;
+  struct CheckExceptionsOperands;
   struct HLEFunctionOperands;
   struct WriteBrokenBlockNPCOperands;
   struct CheckHaltOperands;
@@ -95,10 +95,8 @@ private:
   static s32 WritePC(std::ostream& stream, const WritePCOperands& operands);
   static s32 Interpret(PowerPC::PowerPCState& ppc_state, const InterpretOperands& operands);
   static s32 Interpret(std::ostream& stream, const InterpretOperands& operands);
-  static s32 InterpretAndCheckExceptions(PowerPC::PowerPCState& ppc_state,
-                                         const InterpretAndCheckExceptionsOperands& operands);
-  static s32 InterpretAndCheckExceptions(std::ostream& stream,
-                                         const InterpretAndCheckExceptionsOperands& operands);
+  static s32 CheckExceptions(PowerPC::PowerPCState& ppc_state, const CheckExceptionsOperands& operands);
+  static s32 CheckExceptions(std::ostream& stream, const CheckExceptionsOperands& operands);
   static s32 HLEFunction(PowerPC::PowerPCState& ppc_state, const HLEFunctionOperands& operands);
   static s32 HLEFunction(std::ostream& stream, const HLEFunctionOperands& operands);
   static s32 WriteBrokenBlockNPC(PowerPC::PowerPCState& ppc_state,
@@ -148,7 +146,7 @@ struct BytecodeInterpreter::InterpretOperands
   UGeckoInstruction inst;
 };
 
-struct BytecodeInterpreter::InterpretAndCheckExceptionsOperands : InterpretOperands
+struct BytecodeInterpreter::CheckExceptionsOperands
 {
   PowerPC::PowerPCManager& power_pc;
   u32 current_pc;

@@ -133,11 +133,9 @@ s32 BytecodeInterpreter::Interpret(PowerPC::PowerPCState& ppc_state,
   return sizeof(AnyCallback) + sizeof(operands);
 }
 
-s32 BytecodeInterpreter::InterpretAndCheckExceptions(
-    PowerPC::PowerPCState& ppc_state, const InterpretAndCheckExceptionsOperands& operands)
+s32 BytecodeInterpreter::CheckExceptions(PowerPC::PowerPCState& ppc_state,
+                                       const CheckExceptionsOperands& operands)
 {
-  operands.func(operands.interpreter, operands.inst);
-
   if ((ppc_state.Exceptions & (EXCEPTION_DSI | EXCEPTION_PROGRAM)) != 0)
   {
     ppc_state.pc = operands.current_pc;
@@ -370,23 +368,16 @@ bool BytecodeInterpreter::DoJit(u32 em_address, JitBlock* b, u32 nextPC)
 
       if (op.canEndBlock)
         Write(CallbackCast(WritePC), {js.compilerPC});
+        
+      const InterpretOperands operands = {interpreter, Interpreter::GetInterpreterOp(op.inst),
+                                          op.inst};
+      Write(CallbackCast(Interpret), operands);
 
       // Instruction may cause a DSI Exception or Program Exception.
       if ((jo.memcheck && (op.opinfo->flags & FL_LOADSTORE) != 0) ||
           (!op.canEndBlock && ShouldHandleFPExceptionForInstruction(&op)))
       {
-        const InterpretAndCheckExceptionsOperands operands = {
-            {interpreter, Interpreter::GetInterpreterOp(op.inst), op.inst},
-            power_pc,
-            js.compilerPC,
-            js.downcountAmount};
-        Write(CallbackCast(InterpretAndCheckExceptions), operands);
-      }
-      else
-      {
-        const InterpretOperands operands = {interpreter, Interpreter::GetInterpreterOp(op.inst),
-                                            op.inst};
-        Write(CallbackCast(Interpret), operands);
+        Write(CallbackCast(CheckExceptions), {power_pc, js.compilerPC, js.downcountAmount});
       }
 
       if (op.branchIsIdleLoop)

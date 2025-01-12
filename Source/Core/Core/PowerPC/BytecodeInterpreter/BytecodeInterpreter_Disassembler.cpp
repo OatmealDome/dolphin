@@ -47,13 +47,11 @@ s32 BytecodeInterpreter::Interpret(std::ostream& stream, const InterpretOperands
   return sizeof(AnyCallback) + sizeof(operands);
 }
 
-s32 BytecodeInterpreter::InterpretAndCheckExceptions(
-    std::ostream& stream, const InterpretAndCheckExceptionsOperands& operands)
+s32 BytecodeInterpreter::CheckExceptions(std::ostream& stream,
+                                       const CheckExceptionsOperands& operands)
 {
-  fmt::println(stream,
-               "InterpretAndCheckExceptions(inst=0x{:08x}, current_pc=0x{:08x}, "
-               "downcount={})",
-               operands.inst.hex, operands.current_pc,  operands.downcount);
+  fmt::println(stream, "CheckExceptions(current_pc=0x{:08x}, downcount={})",
+               operands.current_pc, operands.downcount);
   return sizeof(AnyCallback) + sizeof(operands);
 }
 
@@ -112,7 +110,7 @@ std::size_t BytecodeInterpreter::Disassemble(const JitBlock& block, std::ostream
       LOOKUP_KV(BytecodeInterpreter::EndBlock<true>),
       LOOKUP_KV(BytecodeInterpreter::WritePC),
       LOOKUP_KV(BytecodeInterpreter::Interpret),
-      LOOKUP_KV(BytecodeInterpreter::InterpretAndCheckExceptions),
+      LOOKUP_KV(BytecodeInterpreter::CheckExceptions),
       LOOKUP_KV(BytecodeInterpreter::HLEFunction),
       LOOKUP_KV(BytecodeInterpreter::WriteBrokenBlockNPC),
       LOOKUP_KV(BytecodeInterpreter::CheckFPU),

@@ -25,7 +25,7 @@ void BytecodeInterpreterEmitter::Write(AnyCallback callback, const void* operand
   m_code += size;
 }
 
-s32 BytecodeInterpreterEmitter::PoisonCallback(PowerPC::PowerPCState& ppc_state, const void* operands)
+s32 BytecodeInterpreterEmitter::PoisonCallback(const void* operands)
 {
   ASSERT_MSG(DYNA_REC, false,
              "The Cached Interpreter reached a poisoned callback. This should never happen!");

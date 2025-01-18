@@ -62,11 +62,10 @@ void BytecodeInterpreter::ExecuteOneBlock()
     return;
   }
 
-  auto& ppc_state = m_ppc_state;
   while (true)
   {
     const auto callback = *reinterpret_cast<const AnyCallback*>(normal_entry);
-    if (const auto distance = callback(ppc_state, normal_entry + sizeof(callback)))
+    if (const auto distance = callback(normal_entry + sizeof(callback)))
       normal_entry += distance;
     else
       break;
@@ -98,17 +97,16 @@ void BytecodeInterpreter::SingleStep()
   ExecuteOneBlock();
 }
 
-s32 BytecodeInterpreter::StartProfiledBlock(PowerPC::PowerPCState& ppc_state,
-                                          const StartProfiledBlockOperands& operands)
+s32 BytecodeInterpreter::StartProfiledBlock(const StartProfiledBlockOperands& operands)
 {
   JitBlock::ProfileData::BeginProfiling(operands.profile_data);
   return sizeof(AnyCallback) + sizeof(operands);
 }
 
 template <bool profiled>
-s32 BytecodeInterpreter::EndBlock(PowerPC::PowerPCState& ppc_state,
-                                const EndBlockOperands<profiled>& operands)
+s32 BytecodeInterpreter::EndBlock(const EndBlockOperands<profiled>& operands)
 {
+  auto& ppc_state = operands.ppc_state;
   ppc_state.pc = ppc_state.npc;
   ppc_state.downcount -= operands.downcount;
   PowerPC::UpdatePerformanceMonitor(operands.downcount, operands.num_load_stores,
@@ -118,24 +116,23 @@ s32 BytecodeInterpreter::EndBlock(PowerPC::PowerPCState& ppc_state,
   return 0;
 }
 
-s32 BytecodeInterpreter::WritePC(PowerPC::PowerPCState& ppc_state,
-                                const WritePCOperands& operands)
+s32 BytecodeInterpreter::WritePC(const WritePCOperands& operands)
 {
+  auto& ppc_state = operands.ppc_state;
   ppc_state.pc = operands.current_pc;
   ppc_state.npc = operands.current_pc + 4;
   return sizeof(AnyCallback) + sizeof(operands);
 }
 
-s32 BytecodeInterpreter::Interpret(PowerPC::PowerPCState& ppc_state,
-                                 const InterpretOperands& operands)
+s32 BytecodeInterpreter::Interpret(const InterpretOperands& operands)
 {
   operands.func(operands.interpreter, operands.inst);
   return sizeof(AnyCallback) + sizeof(operands);
 }
 
-s32 BytecodeInterpreter::CheckExceptions(PowerPC::PowerPCState& ppc_state,
-                                       const CheckExceptionsOperands& operands)
+s32 BytecodeInterpreter::CheckExceptions(const CheckExceptionsOperands& operands)
 {
+  auto& ppc_state = operands.ppc_state;
   if ((ppc_state.Exceptions & (EXCEPTION_DSI | EXCEPTION_PROGRAM)) != 0)
   {
     ppc_state.pc = operands.current_pc;
@@ -146,26 +143,24 @@ s32 BytecodeInterpreter::CheckExceptions(PowerPC::PowerPCState& ppc_state,
   return sizeof(AnyCallback) + sizeof(operands);
 }
 
-s32 BytecodeInterpreter::HLEFunction(PowerPC::PowerPCState& ppc_state,
-                                   const HLEFunctionOperands& operands)
+s32 BytecodeInterpreter::HLEFunction(const HLEFunctionOperands& operands)
 {
-  const auto& [system, current_pc, hook_index] = operands;
+  auto& [ppc_state, system, current_pc, hook_index] = operands;
   ppc_state.pc = current_pc;
   HLE::Execute(Core::CPUThreadGuard{system}, current_pc, hook_index);
   return sizeof(AnyCallback) + sizeof(operands);
 }
 
-s32 BytecodeInterpreter::WriteBrokenBlockNPC(PowerPC::PowerPCState& ppc_state,
-                                           const WriteBrokenBlockNPCOperands& operands)
+s32 BytecodeInterpreter::WriteBrokenBlockNPC(const WriteBrokenBlockNPCOperands& operands)
 {
-  const auto& [current_pc] = operands;
+  auto& [ppc_state, current_pc] = operands;
   ppc_state.npc = current_pc;
   return sizeof(AnyCallback) + sizeof(operands);
 }
 
-s32 BytecodeInterpreter::CheckFPU(PowerPC::PowerPCState& ppc_state, const CheckHaltOperands& operands)
+s32 BytecodeInterpreter::CheckFPU(const CheckHaltOperands& operands)
 {
-  const auto& [power_pc, current_pc, downcount] = operands;
+  auto& [ppc_state, power_pc, current_pc, downcount] = operands;
   if (!ppc_state.msr.FP)
   {
     ppc_state.pc = current_pc;
@@ -177,10 +172,9 @@ s32 BytecodeInterpreter::CheckFPU(PowerPC::PowerPCState& ppc_state, const CheckH
   return sizeof(AnyCallback) + sizeof(operands);
 }
 
-s32 BytecodeInterpreter::CheckBreakpoint(PowerPC::PowerPCState& ppc_state,
-                                       const CheckHaltOperands& operands)
+s32 BytecodeInterpreter::CheckBreakpoint(const CheckHaltOperands& operands)
 {
-  const auto& [power_pc, current_pc, downcount] = operands;
+  auto& [ppc_state, power_pc, current_pc, downcount] = operands;
   ppc_state.pc = current_pc;
   if (power_pc.CheckAndHandleBreakPoints())
   {
@@ -191,10 +185,9 @@ s32 BytecodeInterpreter::CheckBreakpoint(PowerPC::PowerPCState& ppc_state,
   return sizeof(AnyCallback) + sizeof(operands);
 }
 
-s32 BytecodeInterpreter::CheckIdle(PowerPC::PowerPCState& ppc_state,
-                                 const CheckIdleOperands& operands)
+s32 BytecodeInterpreter::CheckIdle(const CheckIdleOperands& operands)
 {
-  const auto& [core_timing, idle_pc] = operands;
+  const auto& [ppc_state, core_timing, idle_pc] = operands;
   if (ppc_state.npc == idle_pc)
     core_timing.Idle();
   return sizeof(AnyCallback) + sizeof(operands);
@@ -208,7 +201,7 @@ bool BytecodeInterpreter::HandleFunctionHooking(u32 address)
   if (!result)
     return false;
 
-  Write(HLEFunction, {m_system, address, result.hook_index});
+  Write(HLEFunction, {m_ppc_state, m_system, address, result.hook_index});
 
   if (result.type != HLE::HookType::Replace)
     return false;
@@ -222,12 +215,12 @@ void BytecodeInterpreter::WriteEndBlock()
 {
   if (IsProfilingEnabled())
   {
-    Write(EndBlock<true>, {{js.downcountAmount, js.numLoadStoreInst, js.numFloatingPointInst},
+    Write(EndBlock<true>, {{m_ppc_state, js.downcountAmount, js.numLoadStoreInst, js.numFloatingPointInst},
                            js.curBlock->profile_data.get()});
   }
   else
   {
-    Write(EndBlock<false>, {js.downcountAmount, js.numLoadStoreInst, js.numFloatingPointInst});
+    Write(EndBlock<false>, {m_ppc_state, js.downcountAmount, js.numLoadStoreInst, js.numFloatingPointInst});
   }
 }
 
@@ -366,16 +359,16 @@ bool BytecodeInterpreter::DoJit(u32 em_address, JitBlock* b, u32 nextPC)
       if (IsDebuggingEnabled() && !cpu.IsStepping() &&
           breakpoints.IsAddressBreakPoint(js.compilerPC))
       {
-        Write(CheckBreakpoint, {power_pc, js.compilerPC, js.downcountAmount});
+        Write(CheckBreakpoint, {m_ppc_state, power_pc, js.compilerPC, js.downcountAmount});
       }
       if (!js.firstFPInstructionFound && (op.opinfo->flags & FL_USE_FPU) != 0)
       {
-        Write(CheckFPU, {power_pc, js.compilerPC, js.downcountAmount});
+        Write(CheckFPU, {m_ppc_state, power_pc, js.compilerPC, js.downcountAmount});
         js.firstFPInstructionFound = true;
       }
 
       if (op.canEndBlock)
-        Write(CallbackCast(WritePC), {js.compilerPC});
+        Write(CallbackCast(WritePC), {m_ppc_state, js.compilerPC});
 
       CompileInstruction(op);
 
@@ -383,18 +376,18 @@ bool BytecodeInterpreter::DoJit(u32 em_address, JitBlock* b, u32 nextPC)
       if ((jo.memcheck && (op.opinfo->flags & FL_LOADSTORE) != 0) ||
           (!op.canEndBlock && ShouldHandleFPExceptionForInstruction(&op)))
       {
-        Write(CallbackCast(CheckExceptions), {power_pc, js.compilerPC, js.downcountAmount});
+        Write(CallbackCast(CheckExceptions), {m_ppc_state, power_pc, js.compilerPC, js.downcountAmount});
       }
 
       if (op.branchIsIdleLoop)
-        Write(CheckIdle, {m_system.GetCoreTiming(), js.blockStart});
+        Write(CheckIdle, {m_ppc_state, m_system.GetCoreTiming(), js.blockStart});
       if (op.canEndBlock)
         WriteEndBlock();
     }
   }
   if (code_block.m_broken)
   {
-    Write(WriteBrokenBlockNPC, {nextPC});
+    Write(WriteBrokenBlockNPC, {m_ppc_state, nextPC});
     WriteEndBlock();
   }
 

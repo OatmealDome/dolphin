@@ -10,11 +10,6 @@
 #include "Common/CodeBlock.h"
 #include "Common/CommonTypes.h"
 
-namespace PowerPC
-{
-struct PowerPCState;
-}
-
 class BytecodeInterpreterEmitter
 {
 protected:
@@ -22,8 +17,8 @@ protected:
   // If a callback returns 0, the block will be exited. The return value is signed to
   // support block-linking. 32-bit return values seem to perform better than 64-bit ones.
   template <class Operands>
-  using Callback = s32 (*)(PowerPC::PowerPCState& ppc_state, const Operands& operands);
-  using AnyCallback = s32 (*)(PowerPC::PowerPCState& ppc_state, const void* operands);
+  using Callback = s32 (*)(const Operands& operands);
+  using AnyCallback = s32 (*)(const void* operands);
 
   template <class Operands>
   static consteval Callback<Operands> CallbackCast(Callback<Operands> callback)
@@ -83,7 +78,7 @@ public:
     m_write_failed = false;
   }
 
-  static s32 PoisonCallback(PowerPC::PowerPCState& ppc_state, const void* operands);
+  static s32 PoisonCallback(const void* operands);
   static s32 PoisonCallback(std::ostream& stream, const void* operands);
 
 private:

@@ -57,7 +57,7 @@ s32 BytecodeInterpreter::CheckExceptions(std::ostream& stream,
 
 s32 BytecodeInterpreter::HLEFunction(std::ostream& stream, const HLEFunctionOperands& operands)
 {
-  const auto& [system, current_pc, hook_index] = operands;
+  const auto& [ppc_state, system, current_pc, hook_index] = operands;
   fmt::println(stream, "HLEFunction(current_pc=0x{:08x}, hook_index={}) [\"{}\"]", current_pc,
                hook_index, HLE::GetHookNameByIndex(hook_index));
   return sizeof(AnyCallback) + sizeof(operands);
@@ -66,28 +66,28 @@ s32 BytecodeInterpreter::HLEFunction(std::ostream& stream, const HLEFunctionOper
 s32 BytecodeInterpreter::WriteBrokenBlockNPC(std::ostream& stream,
                                            const WriteBrokenBlockNPCOperands& operands)
 {
-  const auto& [current_pc] = operands;
+  const auto& [ppc_state, current_pc] = operands;
   fmt::println(stream, "WriteBrokenBlockNPC(current_pc=0x{:08x})", current_pc);
   return sizeof(AnyCallback) + sizeof(operands);
 }
 
 s32 BytecodeInterpreter::CheckFPU(std::ostream& stream, const CheckHaltOperands& operands)
 {
-  const auto& [power_pc, current_pc, downcount] = operands;
+  const auto& [ppc_state, power_pc, current_pc, downcount] = operands;
   fmt::println(stream, "CheckFPU(current_pc=0x{:08x}, downcount={})", current_pc, downcount);
   return sizeof(AnyCallback) + sizeof(operands);
 }
 
 s32 BytecodeInterpreter::CheckBreakpoint(std::ostream& stream, const CheckHaltOperands& operands)
 {
-  const auto& [power_pc, current_pc, downcount] = operands;
+  const auto& [ppc_state, power_pc, current_pc, downcount] = operands;
   fmt::println(stream, "CheckBreakpoint(current_pc=0x{:08x}, downcount={})", current_pc, downcount);
   return sizeof(AnyCallback) + sizeof(operands);
 }
 
 s32 BytecodeInterpreter::CheckIdle(std::ostream& stream, const CheckIdleOperands& operands)
 {
-  const auto& [core_timing, idle_pc] = operands;
+  const auto& [ppc_state, core_timing, idle_pc] = operands;
   fmt::println(stream, "CheckIdle(idle_pc=0x{:08x})", idle_pc);
   return sizeof(AnyCallback) + sizeof(operands);
 }

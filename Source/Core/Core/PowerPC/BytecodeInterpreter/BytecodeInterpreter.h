@@ -96,29 +96,27 @@ private:
   struct CheckHaltOperands;
   struct CheckIdleOperands;
 
-  static s32 StartProfiledBlock(PowerPC::PowerPCState& ppc_state,
-                                const StartProfiledBlockOperands& operands);
+  static s32 StartProfiledBlock(const StartProfiledBlockOperands& operands);
   static s32 StartProfiledBlock(std::ostream& stream, const StartProfiledBlockOperands& operands);
   template <bool profiled>
-  static s32 EndBlock(PowerPC::PowerPCState& ppc_state, const EndBlockOperands<profiled>& operands);
+  static s32 EndBlock(const EndBlockOperands<profiled>& operands);
   template <bool profiled>
   static s32 EndBlock(std::ostream& stream, const EndBlockOperands<profiled>& operands);
-  static s32 WritePC(PowerPC::PowerPCState& ppc_state, const WritePCOperands& operands);
+  static s32 WritePC(const WritePCOperands& operands);
   static s32 WritePC(std::ostream& stream, const WritePCOperands& operands);
-  static s32 Interpret(PowerPC::PowerPCState& ppc_state, const InterpretOperands& operands);
+  static s32 Interpret(const InterpretOperands& operands);
   static s32 Interpret(std::ostream& stream, const InterpretOperands& operands);
-  static s32 CheckExceptions(PowerPC::PowerPCState& ppc_state, const CheckExceptionsOperands& operands);
+  static s32 CheckExceptions(const CheckExceptionsOperands& operands);
   static s32 CheckExceptions(std::ostream& stream, const CheckExceptionsOperands& operands);
-  static s32 HLEFunction(PowerPC::PowerPCState& ppc_state, const HLEFunctionOperands& operands);
+  static s32 HLEFunction(const HLEFunctionOperands& operands);
   static s32 HLEFunction(std::ostream& stream, const HLEFunctionOperands& operands);
-  static s32 WriteBrokenBlockNPC(PowerPC::PowerPCState& ppc_state,
-                                 const WriteBrokenBlockNPCOperands& operands);
+  static s32 WriteBrokenBlockNPC(const WriteBrokenBlockNPCOperands& operands);
   static s32 WriteBrokenBlockNPC(std::ostream& stream, const WriteBrokenBlockNPCOperands& operands);
-  static s32 CheckFPU(PowerPC::PowerPCState& ppc_state, const CheckHaltOperands& operands);
+  static s32 CheckFPU(const CheckHaltOperands& operands);
   static s32 CheckFPU(std::ostream& stream, const CheckHaltOperands& operands);
-  static s32 CheckBreakpoint(PowerPC::PowerPCState& ppc_state, const CheckHaltOperands& operands);
+  static s32 CheckBreakpoint(const CheckHaltOperands& operands);
   static s32 CheckBreakpoint(std::ostream& stream, const CheckHaltOperands& operands);
-  static s32 CheckIdle(PowerPC::PowerPCState& ppc_state, const CheckIdleOperands& operands);
+  static s32 CheckIdle(const CheckIdleOperands& operands);
   static s32 CheckIdle(std::ostream& stream, const CheckIdleOperands& operands);
 
   HyoutaUtilities::RangeSizeSet<u8*> m_free_ranges;
@@ -133,6 +131,7 @@ struct BytecodeInterpreter::StartProfiledBlockOperands
 template <>
 struct BytecodeInterpreter::EndBlockOperands<false>
 {
+  PowerPC::PowerPCState& ppc_state;
   u32 downcount;
   u32 num_load_stores;
   u32 num_fp_inst;
@@ -147,6 +146,7 @@ struct BytecodeInterpreter::EndBlockOperands<true> : BytecodeInterpreter::EndBlo
 
 struct BytecodeInterpreter::WritePCOperands
 {
+  PowerPC::PowerPCState& ppc_state;
   u32 current_pc;
   u32 : 32;
 };
@@ -160,6 +160,7 @@ struct BytecodeInterpreter::InterpretOperands
 
 struct BytecodeInterpreter::CheckExceptionsOperands
 {
+  PowerPC::PowerPCState& ppc_state;
   PowerPC::PowerPCManager& power_pc;
   u32 current_pc;
   u32 downcount;
@@ -167,6 +168,7 @@ struct BytecodeInterpreter::CheckExceptionsOperands
 
 struct BytecodeInterpreter::HLEFunctionOperands
 {
+  PowerPC::PowerPCState& ppc_state;
   Core::System& system;
   u32 current_pc;
   u32 hook_index;
@@ -174,12 +176,14 @@ struct BytecodeInterpreter::HLEFunctionOperands
 
 struct BytecodeInterpreter::WriteBrokenBlockNPCOperands
 {
+  PowerPC::PowerPCState& ppc_state;
   u32 current_pc;
   u32 : 32;
 };
 
 struct BytecodeInterpreter::CheckHaltOperands
 {
+  PowerPC::PowerPCState& ppc_state;
   PowerPC::PowerPCManager& power_pc;
   u32 current_pc;
   u32 downcount;
@@ -187,6 +191,7 @@ struct BytecodeInterpreter::CheckHaltOperands
 
 struct BytecodeInterpreter::CheckIdleOperands
 {
+  PowerPC::PowerPCState& ppc_state;
   CoreTiming::CoreTimingManager& core_timing;
   u32 idle_pc;
 };

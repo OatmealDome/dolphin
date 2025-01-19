@@ -251,8 +251,9 @@ void BytecodeInterpreter::ResetFreeMemoryRanges()
 
 void BytecodeInterpreter::FallBackToInterpreter(UGeckoInstruction inst)
 {
-  auto& interpreter = m_system.GetInterpreter();
+  gpr.FlushRegisters(BitSet32(0xFFFFFFFF));
 
+  auto& interpreter = m_system.GetInterpreter();
   const InterpretOperands operands = {interpreter, Interpreter::GetInterpreterOp(inst),
                                       inst};
   Write(CallbackCast(Interpret), operands);
@@ -351,6 +352,10 @@ bool BytecodeInterpreter::DoJit(u32 em_address, JitBlock* b, u32 nextPC)
     if (op.opinfo->flags & FL_USE_FPU)
       ++js.numFloatingPointInst;
 
+    // Skip calling UpdateLastUsed for lmw/stmw - it usually hurts more than it helps
+    if (op.inst.OPCD != 46 && op.inst.OPCD != 47)
+      gpr.UpdateLastUsed(op.regsIn | op.regsOut);
+
     if (HandleFunctionHooking(js.compilerPC))
       break;
 
@@ -372,6 +377,8 @@ bool BytecodeInterpreter::DoJit(u32 em_address, JitBlock* b, u32 nextPC)
 
       CompileInstruction(op);
 
+      gpr.FlushRegisters(~op.gprInUse & (op.regsIn | op.regsOut));
+
       // Instruction may cause a DSI Exception or Program Exception.
       if ((jo.memcheck && (op.opinfo->flags & FL_LOADSTORE) != 0) ||
           (!op.canEndBlock && ShouldHandleFPExceptionForInstruction(&op)))
@@ -388,6 +395,7 @@ bool BytecodeInterpreter::DoJit(u32 em_address, JitBlock* b, u32 nextPC)
   if (code_block.m_broken)
   {
     Write(WriteBrokenBlockNPC, {m_ppc_state, nextPC});
+    gpr.FlushRegisters(BitSet32(0xFFFFFFFF));
     WriteEndBlock();
   }
 

@@ -480,6 +480,10 @@ add_library(core
   PowerPC/BreakPoints.cpp
   PowerPC/BreakPoints.h
   PowerPC/BytecodeInterpreter/BytecodeInterpreter_Disassembler.cpp
+  PowerPC/BytecodeInterpreter/BytecodeInterpreter_IR.cpp
+  PowerPC/BytecodeInterpreter/BytecodeInterpreter_IR.h
+  PowerPC/BytecodeInterpreter/BytecodeInterpreter_RegCache.cpp
+  PowerPC/BytecodeInterpreter/BytecodeInterpreter_RegCache.h
   PowerPC/BytecodeInterpreter/BytecodeInterpreter_Tables.cpp
   PowerPC/BytecodeInterpreter/BytecodeInterpreter.cpp
   PowerPC/BytecodeInterpreter/BytecodeInterpreter.h

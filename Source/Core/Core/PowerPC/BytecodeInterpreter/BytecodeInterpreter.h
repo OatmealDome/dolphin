@@ -8,6 +8,8 @@
 #include <rangeset/rangesizeset.h>
 
 #include "Common/CommonTypes.h"
+#include "Core/PowerPC/BytecodeInterpreter/BytecodeInterpreter_IR.h"
+#include "Core/PowerPC/BytecodeInterpreter/BytecodeInterpreter_RegCache.h"
 #include "Core/PowerPC/BytecodeInterpreter/BytecodeInterpreterBlockCache.h"
 #include "Core/PowerPC/BytecodeInterpreter/BytecodeInterpreterEmitter.h"
 #include "Core/PowerPC/JitCommon/JitBase.h"
@@ -66,6 +68,10 @@ public:
   void DynaRunTable31(UGeckoInstruction inst);
   void DynaRunTable59(UGeckoInstruction inst);
   void DynaRunTable63(UGeckoInstruction inst);
+
+  BytecodeGen::BytecodeContext m_ir_context;
+
+  BytecodeGPRCache gpr;
 
 protected:
   void CompileInstruction(PPCAnalyst::CodeOp& op);

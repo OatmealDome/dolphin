@@ -40,3 +40,11 @@ s32 BytecodeGeneric::TransferRegImm32ToGuest(const TransferRegImm32ToGuestOperan
 
   return sizeof(AnyCallback) + sizeof(operands);
 }
+
+s32 BytecodeGeneric::Add(const AddOperands& operands)
+{
+  auto& [ir_context, dest, a, b] = operands;
+  ir_context.regs[(u8)dest] = ir_context.regs[(u8)a] + ir_context.regs[(u8)b];
+
+  return sizeof(AnyCallback) + sizeof(operands);
+}

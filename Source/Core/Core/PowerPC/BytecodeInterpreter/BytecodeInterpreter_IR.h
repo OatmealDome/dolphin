@@ -37,11 +37,15 @@ namespace BytecodeGeneric
   struct TransferRegGuestToHostOperands;
   struct TransferRegImm32ToGuestOperands;
 
+  struct AddOperands;
+
   s32 LoadImm32(const LoadImm32Operands& operands);
 
   s32 TransferRegHostToGuest(const TransferRegHostToGuestOperands& operands);
   s32 TransferRegGuestToHost(const TransferRegGuestToHostOperands& operands);
   s32 TransferRegImm32ToGuest(const TransferRegImm32ToGuestOperands& operands);
+
+  s32 Add(const AddOperands& operands);
 };
 
 struct BytecodeGeneric::LoadImm32Operands
@@ -72,4 +76,12 @@ struct BytecodeGeneric::TransferRegImm32ToGuestOperands
   PowerPC::PowerPCState& ppc_state;
   size_t guest;
   u32 imm;
+};
+
+struct BytecodeGeneric::AddOperands
+{
+  BytecodeGen::BytecodeContext& ir_context;
+  BytecodeGen::BytecodeReg dest;
+  BytecodeGen::BytecodeReg a;
+  BytecodeGen::BytecodeReg b;
 };

@@ -116,6 +116,12 @@ std::size_t BytecodeInterpreter::Disassemble(const JitBlock& block, std::ostream
       LOOKUP_KV(BytecodeInterpreter::CheckFPU),
       LOOKUP_KV(BytecodeInterpreter::CheckBreakpoint),
       LOOKUP_KV(BytecodeInterpreter::CheckIdle),
+      
+      LOOKUP_KV(BytecodeGeneric::LoadImm32),
+      LOOKUP_KV(BytecodeGeneric::TransferRegHostToGuest),
+      LOOKUP_KV(BytecodeGeneric::TransferRegGuestToHost),
+      LOOKUP_KV(BytecodeGeneric::TransferRegImm32ToGuest),
+      LOOKUP_KV(BytecodeGeneric::Add),
   });
 
 #undef LOOKUP_KV

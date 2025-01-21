@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include <fmt/ostream.h>
+
 #include "Common/CommonTypes.h"
 
 #include "Core/PowerPC/PowerPC.h"
@@ -46,6 +48,12 @@ namespace BytecodeGeneric
   s32 TransferRegImm32ToGuest(const TransferRegImm32ToGuestOperands& operands);
 
   s32 Add(const AddOperands& operands);
+
+  s32 LoadImm32(std::ostream& stream, const LoadImm32Operands& operands);
+  s32 TransferRegHostToGuest(std::ostream& stream, const TransferRegHostToGuestOperands& operands);
+  s32 TransferRegGuestToHost(std::ostream& stream, const TransferRegGuestToHostOperands& operands);
+  s32 TransferRegImm32ToGuest(std::ostream& stream, const TransferRegImm32ToGuestOperands& operands);
+  s32 Add(std::ostream& stream, const AddOperands& operands);
 };
 
 struct BytecodeGeneric::LoadImm32Operands

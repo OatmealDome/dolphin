@@ -41,6 +41,7 @@ void BytecodeInterpreter::Init()
 
   jo.enableBlocklink = false;
 
+  gpr.Init(this);
   m_block_cache.Init();
 
   code_block.m_stats = &js.st;
@@ -364,10 +365,12 @@ bool BytecodeInterpreter::DoJit(u32 em_address, JitBlock* b, u32 nextPC)
       if (IsDebuggingEnabled() && !cpu.IsStepping() &&
           breakpoints.IsAddressBreakPoint(js.compilerPC))
       {
+        gpr.FlushRegisters(BitSet32(0xFFFFFFFF));
         Write(CheckBreakpoint, {m_ppc_state, power_pc, js.compilerPC, js.downcountAmount});
       }
       if (!js.firstFPInstructionFound && (op.opinfo->flags & FL_USE_FPU) != 0)
       {
+        gpr.FlushRegisters(BitSet32(0xFFFFFFFF));
         Write(CheckFPU, {m_ppc_state, power_pc, js.compilerPC, js.downcountAmount});
         js.firstFPInstructionFound = true;
       }

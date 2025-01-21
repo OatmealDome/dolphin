@@ -197,5 +197,5 @@ protected:
 
   void FlushRegister(size_t index) override;
 
-  void FlushByHost (BytecodeGen::BytecodeReg) override;
+  void FlushByHost(BytecodeGen::BytecodeReg) override;
 };

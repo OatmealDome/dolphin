@@ -162,6 +162,18 @@ BytecodeReg BytecodeGPRCache::R(size_t preg)
     return host_reg;
   }
   break;
+  case RegType::NotLoaded:  // Register isn't loaded at /all/
+  {
+    // This is a bit annoying. We try to keep these preloaded as much as possible
+    // This can also happen on cases where PPCAnalyst isn't feeing us proper register usage
+    // statistics
+    BytecodeReg host_reg = GetReg();
+    reg.Load(host_reg);
+    reg.SetDirty(false);
+    m_emit->Write(BytecodeGeneric::TransferRegGuestToHost, {m_jit->m_ppc_state, m_jit->m_ir_context, preg, host_reg});
+    return host_reg;
+  }
+  break;
   default:
     ERROR_LOG_FMT(DYNA_REC, "Invalid OpArg Type!");
     break;

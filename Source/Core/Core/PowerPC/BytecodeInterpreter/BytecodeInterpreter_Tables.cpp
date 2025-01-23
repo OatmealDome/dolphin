@@ -35,8 +35,8 @@ constexpr std::array<BytecodeInterpreterOpTemplate, 54> s_primary_table{{
     {11, &BytecodeInterpreter::FallBackToInterpreter},   // cmpi
     {12, &BytecodeInterpreter::FallBackToInterpreter},  // addic
     {13, &BytecodeInterpreter::FallBackToInterpreter},  // addic_rc
-    {14, &BytecodeInterpreter::FallBackToInterpreter},  // addi
-    {15, &BytecodeInterpreter::FallBackToInterpreter},  // addis
+    {14, &BytecodeInterpreter::addix},  // addi
+    {15, &BytecodeInterpreter::addix},  // addis
 
     {20, &BytecodeInterpreter::FallBackToInterpreter},  // rlwimix
     {21, &BytecodeInterpreter::FallBackToInterpreter},  // rlwinmx

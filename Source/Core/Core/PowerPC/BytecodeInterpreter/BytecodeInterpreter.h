@@ -69,6 +69,8 @@ public:
   void DynaRunTable59(UGeckoInstruction inst);
   void DynaRunTable63(UGeckoInstruction inst);
 
+  void addix(UGeckoInstruction inst);
+
   BytecodeGen::BytecodeContext m_ir_context;
 
   BytecodeGPRCache gpr;
